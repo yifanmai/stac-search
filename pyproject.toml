@@ -1,0 +1,37 @@
+[project]
+name = "stac-search"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Yifan Mai", email = "yifan@cs.stanford.edu" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.143.0",
+    "geojson-pydantic>=2.2.0",
+    "geomet>=1.1.0",
+    "psycopg[pool]>=3.3.6",
+    "pydantic>=2.14.1",
+    "pydantic-settings>=2.15.0",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+stac-search = "stac_search.app:main"
+stac-search-setup-database = "stac_search.setup_database:main"
+
+[project.optional-dependencies]
+gunicorn = [
+    "uvicorn-worker>=0.4.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.10,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.17.2",
+    "ty>=0.0.91",
+]

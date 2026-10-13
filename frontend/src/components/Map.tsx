@@ -1,0 +1,165 @@
+import { Map as OLMap, View } from "ol";
+import { useEffect, type RefObject } from "react";
+import { useRef } from "react";
+import type STACCollection from "../types/STACCollection";
+import VectorLayer from "ol/layer/Vector";
+import type BoundingBox from "../types/BoundingBox";
+import type STACItem from "../types/STACItem";
+import type STACAsset from "../types/STACAsset";
+import {
+  createBaseLayer,
+  createSTACAssetsLayer,
+  createSTACCollectionsLayer,
+  createSTACItemsLayer,
+  updateSTACAssetsLayer,
+  updateSTACCollectionsLayer,
+  updateSTACItemsLayer,
+} from "./map/MapLayers";
+import type WebGLTileLayer from "ol/layer/WebGLTile";
+import { type MapAnimationRequest } from "../types/MapAnimationRequest";
+import { performMapAnimations } from "./map/MapAnimations";
+import {
+  createExtentInteraction,
+  createSelectSTACCollectionInteraction,
+  createSelectSTACItemInteraction,
+  updateSelectSTACCollectionInteraction,
+} from "./map/MapInteractions";
+import ExtentInteraction from "ol/interaction/Extent";
+import SelectInteraction from "ol/interaction/Select";
+
+interface Props {
+  stacCollections: STACCollection[];
+  stacItems: STACItem[];
+  stacAssets: STACAsset[];
+  selectedSTACCollection: STACCollection | null;
+  mapAnimationRequest: MapAnimationRequest | null;
+  clearExtentRequest: boolean;
+  onSelectSTACCollection: (stacCollection: STACCollection) => void;
+  onSelectSTACItem: (stacItem: STACItem) => void;
+  onExtentChanged: (bbox: BoundingBox | null) => void;
+  onMapAnimationStarted: () => void;
+}
+
+interface OLMapState {
+  map: OLMap;
+  stacCollectionsLayer: VectorLayer;
+  stacItemsLayer: VectorLayer;
+  stacAssetsLayer: WebGLTileLayer;
+  selectSTACCollectionInteraction: SelectInteraction;
+  extentInteraction: ExtentInteraction;
+}
+
+function createMap(
+  onSelectSTACCollection: (stacCollection: STACCollection) => void,
+  onSelectSTACItem: (stacItem: STACItem) => void,
+  onExtentChanged: (bbox: BoundingBox | null) => void,
+): OLMapState {
+  const map = new OLMap({
+    target: "map",
+    view: new View({
+      center: [0, 0],
+      zoom: 1,
+    }),
+  });
+  map.addLayer(createBaseLayer());
+  const stacCollectionsLayer = createSTACCollectionsLayer();
+  map.addLayer(stacCollectionsLayer);
+  const stacItemsLayer = createSTACItemsLayer();
+  map.addLayer(stacItemsLayer);
+  const stacAssetsLayer = createSTACAssetsLayer();
+  map.addLayer(stacAssetsLayer);
+
+  const selectSTACCollectionInteraction = createSelectSTACCollectionInteraction(
+    stacCollectionsLayer,
+    onSelectSTACCollection,
+  );
+  map.addInteraction(selectSTACCollectionInteraction);
+  const selectSTACItemInteraction = createSelectSTACItemInteraction(
+    stacItemsLayer,
+    onSelectSTACItem,
+  );
+  map.addInteraction(selectSTACItemInteraction);
+  const extentInteraction = createExtentInteraction(onExtentChanged);
+  map.addInteraction(extentInteraction);
+
+  return {
+    map: map,
+    stacCollectionsLayer: stacCollectionsLayer,
+    stacItemsLayer: stacItemsLayer,
+    stacAssetsLayer: stacAssetsLayer,
+    selectSTACCollectionInteraction: selectSTACCollectionInteraction,
+    extentInteraction: extentInteraction,
+  };
+}
+
+function getOrCreateMap(
+  mapStateRef: RefObject<OLMapState | null>,
+  onSelectSTACCollection: (stacCollection: STACCollection) => void,
+  onSelectSTACItem: (stacItem: STACItem) => void,
+  onExtentChanged: (bbox: BoundingBox | null) => void,
+): OLMapState {
+  if (mapStateRef.current) return mapStateRef.current;
+  const newMapState = createMap(
+    onSelectSTACCollection,
+    onSelectSTACItem,
+    onExtentChanged,
+  );
+  mapStateRef.current = newMapState;
+  return newMapState;
+}
+
+function Map({
+  stacCollections,
+  stacItems,
+  stacAssets,
+  selectedSTACCollection,
+  mapAnimationRequest,
+  clearExtentRequest,
+  onSelectSTACCollection,
+  onSelectSTACItem,
+  onMapAnimationStarted,
+  onExtentChanged,
+}: Props) {
+  const mapStateRef = useRef<OLMapState | null>(null);
+
+  useEffect(() => {
+    const mapState = getOrCreateMap(
+      mapStateRef,
+      onSelectSTACCollection,
+      onSelectSTACItem,
+      onExtentChanged,
+    );
+
+    // Update layers
+    updateSTACCollectionsLayer(mapState.stacCollectionsLayer, stacCollections);
+    updateSTACItemsLayer(mapState.stacItemsLayer, stacItems);
+    updateSTACAssetsLayer(mapState.stacAssetsLayer, stacAssets);
+
+    // Update selections
+    updateSelectSTACCollectionInteraction(
+      selectedSTACCollection,
+      mapState.selectSTACCollectionInteraction,
+      mapState.stacCollectionsLayer,
+    );
+
+    // Animate map view (if requested)
+    performMapAnimations(
+      mapState.map,
+      mapAnimationRequest,
+      stacCollections,
+      selectedSTACCollection,
+      mapState.stacCollectionsLayer,
+      onMapAnimationStarted,
+    );
+
+    // Clear extent if requested
+    if (clearExtentRequest) {
+      mapState.extentInteraction.setExtent(null);
+      onExtentChanged(null);
+    }
+  });
+
+  return <div id="map"></div>;
+}
+
+export default Map;

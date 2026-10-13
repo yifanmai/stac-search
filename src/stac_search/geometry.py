@@ -1,0 +1,61 @@
+from collections.abc import Iterable, Sequence
+
+from geojson_pydantic import (
+    GeometryCollection,
+    MultiPolygon,
+    Polygon,
+)
+from geojson_pydantic.geometries import Geometry
+from geojson_pydantic.types import Position
+
+from stac_search.models import BoundingBox
+
+
+def combine_bboxes(bboxes: BoundingBox) -> BoundingBox:
+    return (
+        min([bbox[0] for bbox in bboxes]),
+        min([bbox[1] for bbox in bboxes]),
+        max([bbox[2] for bbox in bboxes]),
+        max([bbox[3] for bbox in bboxes]),
+    )
+
+
+def bbox_for_positions(positions: Iterable[Position]) -> BoundingBox:
+    return (
+        min([position.longitude for position in positions]),
+        min([position.latitude for position in positions]),
+        max([position.longitude for position in positions]),
+        max([position.latitude for position in positions]),
+    )
+
+
+def geometry_to_bounding_box(geometry: Geometry) -> BoundingBox:
+    if isinstance(geometry, Polygon):
+        return bbox_for_positions(geometry.coordinates[0])
+    elif isinstance(geometry, MultiPolygon):
+        return combine_bboxes(
+            [
+                bbox_for_positions(polygon_coords[0])
+                for polygon_coords in geometry.coordinates
+            ]
+        )
+    elif isinstance(geometry, GeometryCollection):
+        return combine_bboxes(
+            [
+                geometry_to_bounding_box(child_geometry)
+                for child_geometry in geometry.geometries
+            ]
+        )
+    else:
+        raise Exception("Not an area type")
+
+
+def bbox_to_polygon(raw_bbox: Sequence[float]) -> Polygon:
+    """Given a bounding box that is 2D (4 elements) or 3D (6 elements), returns a polygon in which all positions are 2D"""
+    num_coords = len(raw_bbox)
+    if num_coords == 4:
+        return Polygon.from_bounds(raw_bbox[0], raw_bbox[1], raw_bbox[2], raw_bbox[3])
+    elif num_coords == 6:
+        return Polygon.from_bounds(raw_bbox[0], raw_bbox[1], raw_bbox[3], raw_bbox[4])
+    else:
+        raise Exception("Bounding box must have 4 or 6 numbers")
