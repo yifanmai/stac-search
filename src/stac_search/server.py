@@ -1,13 +1,14 @@
 import os
 from typing import Any, List, Optional
-from geojson_pydantic import Polygon
-import psycopg
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from geojson_pydantic import Polygon
 from psycopg.types import TypeInfo
 from pydantic import BaseModel
+import psycopg
 
-from geospatial_data_index.geojson_pydantic_adapter import register_adapters
-from fastapi.middleware.cors import CORSMiddleware
+from stac_search.psycopg_adapters import register_adapters
 
 
 class STACCollection(BaseModel):
@@ -18,7 +19,6 @@ class STACCollection(BaseModel):
 
 app = FastAPI(title="STAC Collections")
 
-# app.frontend("/", directory="/home/yifanmai/oss/geospatial-data-vite/dist")
 
 app.add_middleware(
     CORSMiddleware,
