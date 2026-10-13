@@ -1,6 +1,7 @@
 import os
 from typing import Any, List, Optional
 
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from geojson_pydantic import Polygon
@@ -9,6 +10,7 @@ from pydantic import BaseModel
 import psycopg
 
 from stac_search.psycopg_adapters import register_adapters
+from stac_search.config import get_settings
 
 
 class STACCollection(BaseModel):
@@ -16,6 +18,7 @@ class STACCollection(BaseModel):
     title: str
     description: str
     bbox: Polygon
+
 
 app = FastAPI(title="STAC Collections")
 
@@ -29,10 +32,8 @@ app.add_middleware(
 
 
 def get_connection() -> psycopg.Connection:
-    connection_string = os.getenv("POSTGIS_CONNECTION_STRING")
-    if not connection_string:
-        raise Exception("No connection string found")
-    return psycopg.connect(connection_string)
+    
+    return psycopg.connect(get_settings().postgis_connection_string)
 
 def fetch_stac_collections_by_bbox(bbox_coords: List[float]) -> List[STACCollection]:
     query_template = """SELECT

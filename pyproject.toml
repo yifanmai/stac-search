@@ -13,10 +13,12 @@ dependencies = [
     "geomet>=1.1.0",
     "psycopg[pool]>=3.3.6",
     "pydantic>=2.14.1",
+    "pydantic-settings>=2.15.0",
+    "uvicorn>=0.54.0",
 ]
 
 [project.scripts]
-stac-search = "stac_search:main"
+stac-search = "stac_search.main:main"
 
 [build-system]
 requires = ["uv_build>=0.9.10,<0.10.0"]
