@@ -16,10 +16,9 @@ export default function STACCollectionCard({
     event.preventDefault();
   }
   return (
-    <div id="search-result" className={isSelected ? "selected-search-result" : ""}>
-        <p>Title: {stacCollection.title}</p>
-        <p>Description: asdf</p>
-        <a href="#" onClick={onClick}>Go to this</a>
+    <div className={isSelected ? "search-result selected-search-result" : "search-result"}>
+        <h3><a href="#" onClick={onClick}>{stacCollection.title}</a></h3>
+        <p className="stac-collection-description">{stacCollection.description}</p>
     </div>
   )
 }

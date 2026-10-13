@@ -1,43 +1,89 @@
 @import "node_modules/ol/ol.css";
+@import "reset.css";
 
 html, body {
   margin: 0;
   height: 100%;
+  font-family: "Roboto", sans-serif;
 }
+
+.ui-container {
+  position: absolute;
+  display: flex;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ui-column {
+  width: 320px;
+  background: #fff;
+  margin: 16px 0 16px 16px;
+  padding: 0.5rem;
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .10);
+  border-radius: 0.25rem;
+  /* overflow: scroll; */
+}
+
 
 #map {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 100%;  
-}
-
-#searchbox {
-  position: absolute;
-  top: 0;
-  z-index: 99;
-}
-
-#search-results {
-  position: absolute;
-  /* bottom: 0; */
-  top: 100px;
-  background: #fff;
-  border: 1px solid #000;
-  z-index: 99;
-  width: 100px;
+  width: 100%;
+  height: 100%;
 }
 
 #stac-collection-info {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
   position: absolute;
   z-index: 99;
   top: 100px;
-  left: 200px;
+  left: 440px;
   width: 200px;
   background: #fff;
-  border: 1px solid #000;
+}
+
+p {
+  line-height: 1.25em;
+  margin: 0.5em 0;
+}
+
+
+h2 {
+  font-size: 1.25em; 
+}
+
+h3 {
+  font-size: 1.125em; 
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.25em;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+
+.stac-collection-description {
+  max-height: 10rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: #222;
+}
+
+.search-result {
+  margin: 1rem 0;
+  padding-left: 0.5rem;
+  border-left: 0.25rem solid #ddd;
+}
+
+.search-results {
+  margin-top: 16px;
 }
 
 .selected-search-result {
-  border: 1px solid red;
+  border-left: 0.25rem solid #66f;
 }

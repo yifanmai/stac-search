@@ -1,6 +1,4 @@
 import {Collection, Map as OLMap, View} from 'ol';
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
 import {fromLonLat} from 'ol/proj.js';
 
 import {click} from 'ol/events/condition.js';
@@ -22,6 +20,7 @@ import LayerGroup from 'ol/layer/Group';
 
 
 
+const DEFAULT_PADDING = [64, 64, 64, 64 + (64 + 640) * 2];
 
 interface Props {
   stacCollections: STACCollection[];
@@ -149,13 +148,13 @@ function setFeaturesFromSTACCollections(featureCollection: Collection<Feature>, 
 
 function viewActiveSTACCollection(map: OLMap, stacCollection: STACCollection): void {
   const stacCollectionGeoJSON = getPolygonForSTACCollection(stacCollection);
-  map.getView().fit(stacCollectionGeoJSON, {duration: 1000, maxZoom: 10, padding: [100, 100, 100, 100]});
+  map.getView().fit(stacCollectionGeoJSON, {duration: 1000, maxZoom: 10, padding: [64, 64, 64, 64 + (64 + 320) * 2]});
   // console.log(stacCollectionGeoJSON);
 }
 
 function viewAllSTACCollections(map: OLMap, stacCollections: STACCollection[]): void {
   const stacCollectionMultiPolygon = getMultiPolygonForSTACCollection(stacCollections);
-  map.getView().fit(stacCollectionMultiPolygon  , {duration: 1000, maxZoom: 10, padding: [100, 100, 100, 100]});
+  map.getView().fit(stacCollectionMultiPolygon  , {duration: 1000, maxZoom: 10, padding: [64, 64, 64, 64 + 64 + 320]});
 }
 
 function Map({
@@ -205,7 +204,6 @@ function Map({
         if (selectedSTACCollection && selectedSTACCollection.url === selectedSTACCollectionURL)  {
           return;
         }
-        console.log("calling hook");
         for (const stacCollection of stacCollectionsRef.current) {
           if (stacCollection.url == selectedSTACCollectionURL) {
             onSelectResult(stacCollection);
@@ -213,13 +211,9 @@ function Map({
           }
         }
       });
-      // map.addInteraction(mouseoverInteraction);
       mapStateRef.current = {map: map, vectorSource: vectorSource, featureCollection: featureCollection};
     }
-    // mapRef.current.getView().animate({center: webMercatorCenter, zoom: zoom});
-    // mapRef.current.getView().fit(, {})
     setFeaturesFromSTACCollections(mapStateRef.current.featureCollection, stacCollections);
-    // console.log(getMultiPolygonForSTACCollection(stacCollections));
     if (selectedSTACCollection) {
       for (const feature of mapStateRef.current.vectorSource.getFeatures()) {
         if (feature.getProperties()["url"] == selectedSTACCollection["url"]) {

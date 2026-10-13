@@ -9,8 +9,8 @@ export default function STACCollectionInfoBox({
 }: Props) {
 
   return (
-    <div id="stac-collection-info">
-          <p>{stacCollection.title}</p>
+    <div className="ui-column">
+          <h2>{stacCollection.title}</h2>
           <p>{stacCollection.description}</p>
     </div>
   )

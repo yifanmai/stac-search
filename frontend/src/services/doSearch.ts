@@ -1,23 +1,24 @@
 import type STACCollection from "../types/STACCollection";
 
-const searchURL = "https://localhost:4000/"
+const SEARCH_URL = "http://localhost:8000/stac/collection"
 
 export default async function doSearch(
   queryText: string,
   signal: AbortSignal,
-): Promise<STACCollection[]> {
+): Promise<STACCollection[] | null> {
   try {
     const params = new URLSearchParams();
     params.append("q", queryText);
     const searchResults = await fetch(
-      `http://localhost:8000/stac/collection?${params}`,
+      `${SEARCH_URL}?${params}`,
       { signal },
     );
 
-    return (await searchResults.json()) as Promise<STACCollection[]>;
+    return searchResults.json();
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
-      console.log("search API request aborted");
+      console.log("Search API request aborted");
+      return null;
     } else {
       throw error;
     }
