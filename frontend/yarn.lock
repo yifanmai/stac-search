@@ -738,6 +738,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/geojson@npm:^0":
+  version: 0.0.32
+  resolution: "@types/geojson@npm:0.0.32"
+  checksum: 10c0/fb2ad12adf99589a9683eff3de46cc83e8efe88e81be113b3f7592cec7fa511e1572b8a93889a8f60a63ee1d887184e67d0c4a70a77ca30c1831a925bebc9915
+  languageName: node
+  linkType: hard
+
 "@types/json-schema@npm:^7.0.15":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
@@ -1392,6 +1399,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"geojson@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "geojson@npm:0.5.0"
+  checksum: 10c0/d7fd376c201933dea1307b7c08032f249f73b9399d6287211f6a523d0efa9260caf2a38319f55075682d53dc4cb4c52b9f9c845f2fd03bef9832903f16177ab0
+  languageName: node
+  linkType: hard
+
 "geospatial-data-vite@workspace:.":
   version: 0.0.0-use.local
   resolution: "geospatial-data-vite@workspace:."
@@ -1400,6 +1414,7 @@ __metadata:
     "@eslint/js": "npm:^10.0.1"
     "@rolldown/plugin-babel": "npm:^0.2.3"
     "@types/babel__core": "npm:^7.20.5"
+    "@types/geojson": "npm:^0"
     "@types/node": "npm:^24.13.3"
     "@types/react": "npm:^19.2.18"
     "@types/react-dom": "npm:^19.2.7"
@@ -1408,6 +1423,7 @@ __metadata:
     eslint: "npm:^10.10.0"
     eslint-plugin-react-hooks: "npm:^7.1.1"
     eslint-plugin-react-refresh: "npm:^0.5.6"
+    geojson: "npm:^0.5.0"
     globals: "npm:^17.12.0"
     ol: "npm:^10.11.0"
     ol-mapbox-style: "npm:^13.5.1"

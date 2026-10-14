@@ -9,6 +9,7 @@ import GeoJSON from 'ol/format/GeoJSON.js';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import Feature from 'ol/Feature';
+import type { FeatureLike } from 'ol/Feature';
 import Polygon from 'ol/geom/Polygon.js';
 import { MultiPolygon } from 'ol/geom';
 import Style from 'ol/style/Style';
@@ -19,9 +20,6 @@ import Select from 'ol/interaction/Select.js';
 import { apply as applyOLMapboxStyle } from 'ol-mapbox-style';
 import LayerGroup from 'ol/layer/Group';
 
-
-
-const DEFAULT_PADDING = [64, 64, 64, 64 + (64 + 640) * 2];
 
 interface Props {
   stacCollections: STACCollection[];
@@ -35,26 +33,7 @@ interface OLMapState {
   featureCollection: Collection<Feature>;
 }
 
-const resultStyle = new Style({
-  stroke: new Stroke({
-   color: '#3399CC',
-   width: 2.5,
- }),
- text:  new Text({
-    font: '12px Calibri,sans-serif',
-    overflow: true,
-    fill: new Fill({
-      color: '#3399CC',
-    }),
-    stroke: new Stroke({
-      color: '#fff',
-      width: 3,
-    }),
-    text: "Placeholder"
-  }),
-});
-
-const resultStyleFunction = (feature: Feature, _index: number): Style => {
+const resultStyleFunction = (feature: FeatureLike, _index: number): Style => {
   return new Style({
   stroke: new Stroke({
    color: '#3399CC',
@@ -76,8 +55,7 @@ const resultStyleFunction = (feature: Feature, _index: number): Style => {
 })
 }
 
-
-const selectStyleFunction = (feature: Feature, _index: number): Style => {
+const selectStyleFunction = (feature: FeatureLike, _index: number): Style => {
   return new Style({
   stroke: new Stroke({
     color: '#ff0000',
@@ -98,15 +76,6 @@ const selectStyleFunction = (feature: Feature, _index: number): Style => {
   }),
 })
 }
-
-
-const selectStyle = new Style({
-  stroke: new Stroke({
-    color: 'rgba(255, 0, 0, 1)',
-    width: 2.5,
-  }),
-});
-
 
 // select interaction working on "click"
 const selectInteraction = new Select({
