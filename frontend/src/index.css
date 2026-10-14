@@ -99,3 +99,26 @@ h1, h2, h3, h4, h5, h6 {
   right: .5em !important;
   bottom: 2.5em !important;
 }
+
+.text-input {
+  border: 1px solid #eeeeee;
+  border-radius: 0.25rem;
+  padding: .375rem .75rem;
+}
+
+.btn {
+  padding: .375rem .75rem;
+  display: inline-block;
+  font-family: "Roboto", sans-serif;
+  color: #fff;
+  background-color: #007bff;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  text-align: center;
+  vertical-align: middle
+}
+
+
+.btn:hover {
+  background-color: #333;
+}

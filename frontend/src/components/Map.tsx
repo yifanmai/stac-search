@@ -12,8 +12,9 @@ import Feature from 'ol/Feature';
 import Polygon from 'ol/geom/Polygon.js';
 import { MultiPolygon } from 'ol/geom';
 import Style from 'ol/style/Style';
-// import Fill from 'ol/style/Fill';
+import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
+import Text from 'ol/style/Text';
 import Select from 'ol/interaction/Select.js';
 import { apply as applyOLMapboxStyle } from 'ol-mapbox-style';
 import LayerGroup from 'ol/layer/Group';
@@ -39,7 +40,65 @@ const resultStyle = new Style({
    color: '#3399CC',
    width: 2.5,
  }),
+ text:  new Text({
+    font: '12px Calibri,sans-serif',
+    overflow: true,
+    fill: new Fill({
+      color: '#3399CC',
+    }),
+    stroke: new Stroke({
+      color: '#fff',
+      width: 3,
+    }),
+    text: "Placeholder"
+  }),
 });
+
+const resultStyleFunction = (feature: Feature, _index: number): Style => {
+  return new Style({
+  stroke: new Stroke({
+   color: '#3399CC',
+   width: 2.5,
+ }),
+ text:  new Text({
+    declutterMode: "declutter",
+    overflow: true,
+    font: '12px Calibri,sans-serif',
+    fill: new Fill({
+      color: '#3399CC',
+    }),
+    stroke: new Stroke({
+      color: '#fff',
+      width: 3,
+    }),
+    text: feature.getProperties()["title"]
+  }),
+})
+}
+
+
+const selectStyleFunction = (feature: Feature, _index: number): Style => {
+  return new Style({
+  stroke: new Stroke({
+    color: '#ff0000',
+    width: 2.5,
+  }),
+ text:  new Text({
+  declutterMode: "declutter",
+  overflow: true,
+    font: '12px Calibri,sans-serif',
+    fill: new Fill({
+      color: '#ff0000',
+    }),
+    stroke: new Stroke({
+      color: '#fff',
+      width: 3,
+    }),
+    text: feature.getProperties()["title"]
+  }),
+})
+}
+
 
 const selectStyle = new Style({
   stroke: new Stroke({
@@ -48,10 +107,11 @@ const selectStyle = new Style({
   }),
 });
 
+
 // select interaction working on "click"
 const selectInteraction = new Select({
   condition: click,
-  style: selectStyle,
+  style: selectStyleFunction,
 });
 
 function getGeoJSONFeatureForSTACCollection(stacCollection: STACCollection): Feature {
@@ -77,7 +137,8 @@ function getGeoJSONFeatureForSTACCollection(stacCollection: STACCollection): Fea
           ],
         },
         'properties': {
-          'url': stacCollection.url
+          'title': stacCollection.title,
+          'url': stacCollection.url,
         }
       }, {dataProjection: 'EPSG:3857'});
       console.log(feature);
@@ -166,7 +227,7 @@ function Map({
       });
       const vectorLayer = new VectorLayer({
         source: vectorSource,
-        style: resultStyle,
+        style: resultStyleFunction,
       });
       map.addLayer(vectorLayer);
       map.addInteraction(selectInteraction);

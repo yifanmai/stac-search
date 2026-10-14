@@ -17,11 +17,13 @@ export default function SearchQueryBox({
 
   return (
     <form id="searchbox">
+      <h1>STAC Search</h1>
         <input
             type="text"
             onChange={(e) => setQueryText(e.target.value)}
+            className="text-input"
         ></input>
-        <input type="submit" value="Search" onClick={onClick}></input>
+        <input type="submit" value="Search" onClick={onClick} className="btn"></input>
     </form>
   )
 }
