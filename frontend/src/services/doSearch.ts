@@ -1,6 +1,6 @@
 import type STACCollection from "../types/STACCollection";
 
-const SEARCH_URL = "http://localhost:8000/stac/collection"
+const SEARCH_URL = "http://localhost:8000/stac/collection";
 
 export default async function doSearch(
   queryText: string,
@@ -9,10 +9,7 @@ export default async function doSearch(
   try {
     const params = new URLSearchParams();
     params.append("q", queryText);
-    const searchResults = await fetch(
-      `${SEARCH_URL}?${params}`,
-      { signal },
-    );
+    const searchResults = await fetch(`${SEARCH_URL}?${params}`, { signal });
 
     return searchResults.json();
   } catch (error) {

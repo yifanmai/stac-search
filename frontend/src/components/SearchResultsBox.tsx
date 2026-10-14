@@ -12,18 +12,22 @@ export default function SearchResultsBox({
   selectedSTACCollection,
   onSelectResult,
 }: Props) {
-
   return (
     <div className="search-results">
-      {stacCollections !== null && stacCollections.length === 0 ? <div>No results found</div> : null}
-      {(stacCollections || []).map((stacCollection) =>
+      {stacCollections !== null && stacCollections.length === 0 ? (
+        <div>No results found</div>
+      ) : null}
+      {(stacCollections || []).map((stacCollection) => (
         <STACCollectionCard
-        key={stacCollection.url}
-        stacCollection={stacCollection}
-        onSelectResult={onSelectResult}
-        isSelected={selectedSTACCollection !== null && selectedSTACCollection.url === stacCollection.url} >
-
-        </STACCollectionCard>)}
+          key={stacCollection.url}
+          stacCollection={stacCollection}
+          onSelectResult={onSelectResult}
+          isSelected={
+            selectedSTACCollection !== null &&
+            selectedSTACCollection.url === stacCollection.url
+          }
+        ></STACCollectionCard>
+      ))}
     </div>
-  )
+  );
 }

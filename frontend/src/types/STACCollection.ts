@@ -1,7 +1,7 @@
-import type { Polygon } from 'geojson';
+import type { Polygon } from "geojson";
 
 export default interface STACCollection {
-  url: string,
+  url: string;
   title: string;
   description: string;
   bbox: Polygon;

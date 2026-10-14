@@ -1,5 +1,5 @@
 export default interface SearchResults {
-  url: string,
+  url: string;
   title: string;
   description: string;
   bbox: [number, number, number, number];
