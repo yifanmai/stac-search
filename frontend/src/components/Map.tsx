@@ -34,6 +34,12 @@ interface OLMapState {
   featureCollection: Collection<Feature>;
 }
 
+const resultStyle = new Style({
+  stroke: new Stroke({
+   color: '#3399CC',
+   width: 2,
+ }),
+});
 
 const selectStyle = new Style({
   stroke: new Stroke({
@@ -42,44 +48,11 @@ const selectStyle = new Style({
   }),
 });
 
-
-// function styleSelectedFeature(feature: Feature) {
-//   return selectStyle;
-// }
-
 // select interaction working on "click"
 const selectInteraction = new Select({
   condition: click,
   style: selectStyle,
 });
-
-
-// const mouseoverStyle = new Style({
-//   stroke: new Stroke({
-//     color: 'rgba(255, 255, 0, 1)',
-//     width: 2,
-//   }),
-// });
-
-// select interaction working on "click"
-// const mouseoverInteraction = new Select({
-//   condition: pointerMove,
-//   style: mouseoverStyle,
-// });
-
-
-// function getPolygonCoordinatesForSTACCollection(stacCollection: STACCollection) {
-//   const coords = [];
-//   coords.push(fromLonLat([stacCollection.bbox[0], stacCollection.bbox[1]]));
-//   coords.push(fromLonLat([stacCollection.bbox[2], stacCollection.bbox[3]]));
-//   return [
-//               [coords[0][0], coords[0][1]],
-//               [coords[1][0], coords[0][1]],
-//               [coords[1][0], coords[1][1]],
-//               [coords[0][0], coords[1][1]],
-//               [coords[0][0], coords[0][1]],
-//             ];
-// }
 
 function getGeoJSONFeatureForSTACCollection(stacCollection: STACCollection): Feature {
   const coords = [];
@@ -191,7 +164,10 @@ function Map({
       const vectorSource = new VectorSource({
         features: featureCollection,
       });
-      const vectorLayer = new VectorLayer({source: vectorSource});
+      const vectorLayer = new VectorLayer({
+        source: vectorSource,
+        style: resultStyle,
+      });
       map.addLayer(vectorLayer);
       map.addInteraction(selectInteraction);
       selectInteraction.on("select", (event) => {
