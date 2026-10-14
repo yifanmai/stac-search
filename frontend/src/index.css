@@ -16,18 +16,17 @@ html, body {
   height: 100%;
   pointer-events: none;
   align-items: flex-start;
-  padding: 1em;
 }
 
 .ui-column {
   width: 320px;
   background: #fff;
-  /* margin: 16px 0 16px 16px; */
+  margin: 1rem 0 1rem 1rem;
   padding: 0.5rem;
   box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .10);
   border-radius: 0.25rem;
   pointer-events: all;
-  max-height: 100%;
+  max-height: calc(100% - 3rem);
   overflow: auto;
 }
 
@@ -80,9 +79,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .search-result {
-  margin: 1rem 0;
-  padding-left: 0.5rem;
+  margin: 0.5rem 0;
+  padding: 1em;
   border-left: 0.25rem solid #ddd;
+  box-shadow: 0 .125rem .375rem rgba(0, 0, 0, .05);
 }
 
 .search-results {
@@ -91,4 +91,11 @@ h1, h2, h3, h4, h5, h6 {
 
 .selected-search-result {
   border-left: 0.25rem solid #66f;
+}
+
+.ol-zoom {
+  top: unset !important;
+  left: unset !important;
+  right: .5em !important;
+  bottom: 2.5em !important;
 }

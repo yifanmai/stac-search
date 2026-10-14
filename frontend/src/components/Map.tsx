@@ -37,14 +37,14 @@ interface OLMapState {
 const resultStyle = new Style({
   stroke: new Stroke({
    color: '#3399CC',
-   width: 2,
+   width: 2.5,
  }),
 });
 
 const selectStyle = new Style({
   stroke: new Stroke({
     color: 'rgba(255, 0, 0, 1)',
-    width: 2,
+    width: 2.5,
   }),
 });
 
