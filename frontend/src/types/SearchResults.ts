@@ -1,4 +1,4 @@
-import type { BoundingBox } from "./BoundingBox";
+import type BoundingBox from "./BoundingBox";
 
 export default interface SearchResults {
   url: string;
