@@ -218,6 +218,7 @@ function Map({
       const vectorLayer = new VectorLayer({
         source: vectorSource,
         style: resultStyleFunction,
+        declutter: true,
       });
       map.addLayer(vectorLayer);
       map.addInteraction(selectInteraction);
