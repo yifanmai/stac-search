@@ -278,6 +278,11 @@ function Map({
       };
     }
 
+
+    if (clearAreaOfInterest) {
+      extentInteraction.setExtent(null);
+    }
+
     setFeaturesFromSTACCollections(
       mapStateRef.current.featureCollection,
       stacCollections,
@@ -293,10 +298,6 @@ function Map({
       viewActiveSTACCollection(mapStateRef.current.map, selectedSTACCollection);
     } else if (stacCollections.length > 0) {
       viewAllSTACCollections(mapStateRef.current.map, stacCollections);
-    }
-
-    if (clearAreaOfInterest) {
-      extentInteraction.setExtent(null);
     }
   });
 

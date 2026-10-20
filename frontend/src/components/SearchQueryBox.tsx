@@ -1,9 +1,10 @@
 import { useState } from "react";
 import type BoundingBox from "../types/BoundingBox";
+import type SearchQuery from "../types/SearchQuery";
 
 interface Props {
   areaOfInterest: BoundingBox | null,
-  onSearchQuery: (queryText: string) => void;
+  onSearchQuery: (searchQuery: SearchQuery) => void;
   onClearAreaOfInterest: () => void;
 }
 
@@ -17,7 +18,10 @@ export default function SearchQueryBox({ areaOfInterest, onSearchQuery, onClearA
 
   const onClick = (event: React.MouseEvent<HTMLInputElement>) => {
     event.preventDefault();
-    onSearchQuery(queryText);
+    onSearchQuery({
+      queryText: queryText,
+      bbox: areaOfInterest,
+    });
   };
 
   const onClickClearQueryOfInterestLink  = (event: React.MouseEvent<HTMLAnchorElement>) => {

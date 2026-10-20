@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-// import './App.css'
 import SearchQueryBox from "./SearchQueryBox.tsx";
 import Map from "./Map.tsx";
 import type STACCollection from "../types/STACCollection.ts";
@@ -8,6 +7,7 @@ import SearchResultsBox from "./SearchResultsBox.tsx";
 import STACCollectionInfoBox from "./STACCollectionInfoBox.tsx";
 import doSearch from "../services/doSearch.ts";
 import type BoundingBox from "../types/BoundingBox.ts";
+import type SearchQuery from "../types/SearchQuery.ts";
 
 export default function App() {
   // const [count, setCount] = useState(0)
@@ -16,7 +16,7 @@ export default function App() {
   >(null);
   const [selectedSTACCollection, setSelectedSTACCollection] =
     useState<STACCollection | null>(null);
-  const [queryText, setQueryText] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<SearchQuery | null>(null);
   const [areaOfInterest, setAreaOfInterest] = useState<BoundingBox | null>(null);
 
   // Hacky way to clear the area of interest from Map from the button on SearchQueryBox.
@@ -26,7 +26,9 @@ export default function App() {
   const [clearAreaOfInterest, setClearAreaOfInterest] = useState<boolean>(false);
 
   useEffect(() => {
+    if (searchQuery === null) return;
     const controller = new AbortController();
+    const queryText = searchQuery.queryText;
     console.log("searching for " + queryText);
     async function asyncDoSearch() {
       if (queryText === null) return;
@@ -37,11 +39,10 @@ export default function App() {
 
     asyncDoSearch();
     return () => controller.abort();
-  }, [queryText]);
+  }, [searchQuery]);
 
-  const onSearchQuery = (newQueryText: string) => {
-    console.log(newQueryText);
-    setQueryText(newQueryText);
+  const onSearchQuery = (searchQuery: SearchQuery) => {
+    setSearchQuery(searchQuery);
   };
 
   const onSelectResult = (stacCollection: STACCollection) => {
