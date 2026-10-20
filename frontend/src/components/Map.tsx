@@ -209,6 +209,7 @@ function Map({
   const mapRef = useRef<OLMap | null>(null);
   const mapStateRef = useRef<OLMapState | null>(null);
   const stacCollectionsRef = useRef<STACCollection[]>(stacCollections);
+  const ignoreNextEffect = useRef<bool>(false);
 
   useEffect(() => {
     stacCollectionsRef.current = stacCollections;
@@ -281,7 +282,18 @@ function Map({
 
     if (clearAreaOfInterest) {
       extentInteraction.setExtent(null);
+      // Hack to prevent map after the area of interest is cleared
+      ignoreNextEffect.current = true;
+      return;
     }
+
+    // Hack to prevent map after the area of interest is cleared
+    if (ignoreNextEffect.current) {
+      ignoreNextEffect.current = false;
+      return;
+    }
+
+    console.log("redozoom")
 
     setFeaturesFromSTACCollections(
       mapStateRef.current.featureCollection,
