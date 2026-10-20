@@ -1,10 +1,17 @@
 import { useState } from "react";
+import type BoundingBox from "../types/BoundingBox";
 
 interface Props {
+  areaOfInterest: BoundingBox | null,
   onSearchQuery: (queryText: string) => void;
+  onClearAreaOfInterest: () => void;
 }
 
-export default function SearchQueryBox({ onSearchQuery }: Props) {
+function areaOfInterestToString(areaOfInterest: BoundingBox): string {
+  return areaOfInterest.map((x) => x.toFixed(3)).join(", ")
+}
+
+export default function SearchQueryBox({ areaOfInterest, onSearchQuery, onClearAreaOfInterest }: Props) {
   // const [count, setCount] = useState(0)
   const [queryText, setQueryText] = useState<string>("");
 
@@ -13,6 +20,14 @@ export default function SearchQueryBox({ onSearchQuery }: Props) {
     onSearchQuery(queryText);
   };
 
+  const onClickClearQueryOfInterestLink  = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    onClearAreaOfInterest();
+    console.log("clicked");
+  };
+  
+
+  console.log(areaOfInterest);
   return (
     <form id="searchbox">
       <h1>STAC Search</h1>
@@ -27,6 +42,11 @@ export default function SearchQueryBox({ onSearchQuery }: Props) {
         onClick={onClick}
         className="btn"
       ></input>
+      <p>Area of interest: {areaOfInterest !== null ? areaOfInterestToString(areaOfInterest) : ""} (<a href="#" onClick={onClickClearQueryOfInterestLink}>clear</a>)
+      </p>
+      <p>Ctrl-click or ⌘-click to draw and modify area of interest</p>
     </form>
+    
+
   );
 }

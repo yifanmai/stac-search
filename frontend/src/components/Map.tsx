@@ -1,29 +1,33 @@
 import { Collection, Map as OLMap, View } from "ol";
-import { fromLonLat } from "ol/proj.js";
+import { fromLonLat, toLonLat } from "ol/proj.js";
 
-import { click } from "ol/events/condition.js";
+import { click, platformModifierKeyOnly } from "ol/events/condition";
 import { useEffect } from "react";
 import { useRef } from "react";
+import ExtentInteraction from 'ol/interaction/Extent';
 import type STACCollection from "../types/STACCollection";
 import GeoJSON from "ol/format/GeoJSON.js";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import Feature from "ol/Feature";
 import type { FeatureLike } from "ol/Feature";
-import Polygon from "ol/geom/Polygon.js";
+import Polygon from "ol/geom/Polygon";
 import { MultiPolygon } from "ol/geom";
 import Style from "ol/style/Style";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
 import Text from "ol/style/Text";
-import Select from "ol/interaction/Select.js";
+import Select from "ol/interaction/Select";
 import { apply as applyOLMapboxStyle } from "ol-mapbox-style";
 import LayerGroup from "ol/layer/Group";
+import type BoundingBox from "../types/BoundingBox";
 
 interface Props {
   stacCollections: STACCollection[];
   selectedSTACCollection: STACCollection | null;
+  clearAreaOfInterest: boolean;
   onSelectResult: (stacCollection: STACCollection) => void;
+  onExtentChanged: (bbox: BoundingBox | null) => void;
 }
 
 interface OLMapState {
@@ -80,6 +84,20 @@ const selectStyleFunction = (feature: FeatureLike, _index: number): Style => {
 const selectInteraction = new Select({
   condition: click,
   style: selectStyleFunction,
+});
+
+
+const extentInteraction = new ExtentInteraction({
+  condition: platformModifierKeyOnly,
+  boxStyle: new Style({
+    stroke: new Stroke({
+      color: [255, 255, 255, 0.8],
+      width: 2.5,
+    }),
+    fill: new Fill({
+      color: [255, 255, 255, 0.1],
+    }),
+  })
 });
 
 function getGeoJSONFeatureForSTACCollection(
@@ -184,15 +202,15 @@ function viewAllSTACCollections(
 function Map({
   stacCollections,
   selectedSTACCollection,
+  clearAreaOfInterest,
   onSelectResult,
+  onExtentChanged,
 }: Props) {
-  // const [count, setCount] = useState(0)
   const mapRef = useRef<OLMap | null>(null);
   const mapStateRef = useRef<OLMapState | null>(null);
   const stacCollectionsRef = useRef<STACCollection[]>(stacCollections);
 
   useEffect(() => {
-    console.log("currect cols", stacCollections);
     stacCollectionsRef.current = stacCollections;
     if (!mapStateRef.current) {
       const openFreeMapLayerGroup = new LayerGroup();
@@ -211,7 +229,6 @@ function Map({
       });
       mapRef.current = map;
       const featureCollection = new Collection<Feature>();
-
       const vectorSource = new VectorSource({
         features: featureCollection,
       });
@@ -220,8 +237,10 @@ function Map({
         style: resultStyleFunction,
         declutter: true,
       });
+
       map.addLayer(vectorLayer);
       map.addInteraction(selectInteraction);
+      map.addInteraction(extentInteraction);
       selectInteraction.on("select", (event) => {
         const selectedFeatures = event.target.getFeatures().getArray();
         if (selectedFeatures.length !== 1) {
@@ -243,16 +262,27 @@ function Map({
           }
         }
       });
+      extentInteraction.on("extentchanged", (event) => {
+        if (event.extent === null) {
+          onExtentChanged(null);
+        } else {
+          const bbox = toLonLat(event.extent.slice(0, 2)).concat(toLonLat(event.extent.slice(2, 4)));
+          // Manually index into array to satisfy tuple length type checking
+          onExtentChanged([bbox[0], bbox[1], bbox[2], bbox[3]]);
+        }
+      });
       mapStateRef.current = {
         map: map,
         vectorSource: vectorSource,
         featureCollection: featureCollection,
       };
     }
+
     setFeaturesFromSTACCollections(
       mapStateRef.current.featureCollection,
       stacCollections,
     );
+
     if (selectedSTACCollection) {
       for (const feature of mapStateRef.current.vectorSource.getFeatures()) {
         if (feature.getProperties()["url"] == selectedSTACCollection["url"]) {
@@ -263,6 +293,10 @@ function Map({
       viewActiveSTACCollection(mapStateRef.current.map, selectedSTACCollection);
     } else if (stacCollections.length > 0) {
       viewAllSTACCollections(mapStateRef.current.map, stacCollections);
+    }
+
+    if (clearAreaOfInterest) {
+      extentInteraction.setExtent(null);
     }
   });
 
