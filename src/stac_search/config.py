@@ -28,6 +28,7 @@ def set_settings(settings: Settings) -> None:
 
 
 def get_settings() -> Settings:
+    global SETTINGS
     if SETTINGS is None:
         SETTINGS = Settings()
     return SETTINGS
