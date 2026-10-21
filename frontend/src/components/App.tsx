@@ -28,11 +28,9 @@ export default function App() {
   useEffect(() => {
     if (searchQuery === null) return;
     const controller = new AbortController();
-    const queryText = searchQuery.queryText;
-    console.log("searching for " + queryText);
     async function asyncDoSearch() {
-      if (queryText === null) return;
-      const response = await doSearch(queryText, controller.signal);
+      if (searchQuery === null) return;
+      const response = await doSearch(searchQuery, controller.signal);
       setSelectedSTACCollection(null);
       setSTACCollections(response);
     }
