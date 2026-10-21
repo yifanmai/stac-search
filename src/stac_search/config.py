@@ -29,7 +29,7 @@ def set_settings(settings: Settings) -> None:
 
 def get_settings() -> Settings:
     if SETTINGS is None:
-        raise Exception("Cannot use settings before they have been initialized")
+        SETTINGS = Settings()
     return SETTINGS
 
 
