@@ -9,9 +9,10 @@ from psycopg.types import TypeInfo
 from pydantic import TypeAdapter
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from stac_search.geometry import geometry_to_bounding_box
 from stac_search.traverse_files import get_collection_paths_recursively, get_item_paths, get_root_catalog_paths, maybe_load_json_object_from_file
 from stac_search.psycopg_adapters import register_adapters
-from geojson_pydantic import GeometryCollection, Polygon
+from geojson_pydantic import Polygon
 
 
 CATALOGS_DIR_PATH = Path("/home/yifanmai/oss/stac-catalogs-2026-10-22")
@@ -94,19 +95,20 @@ def load_collection_into_postgis(conn: psycopg.Connection, collection: Mapping, 
 def load_item_into_postgis(conn: psycopg.Connection, item: Mapping, parent_collection_url: str):
     url = get_crawl_target_url(item)
     id = item["id"]
-    if item.get("bbox"):
-        bbox_polygon = Polygon.from_bounds(*item["bbox"])
-    elif item.get("geometry"):
-        bbox_polygon = Polygon([])
-    else:
-        raise Exception("Item has no bbox or geometry")
 
     if item.get("geometry"):
         geometry = TypeAdapter(Geometry).validate_python(item["geometry"])
     elif item.get("bbox"):
-        geometry = Polygon.from_bounds(item["bbox"])
+        geometry = Polygon.from_bounds(*item["bbox"])
     else:
         raise Exception("Item has no bbox or geometry")
+
+    if item.get("bbox"):
+        bbox = item["bbox"]
+    else:
+        bbox = geometry_to_bounding_box(geometry)
+
+    bbox_polygon = Polygon.from_bounds(*bbox)
 
     params = {
         "url": url,
