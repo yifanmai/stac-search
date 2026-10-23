@@ -61,7 +61,7 @@ def get_crawl_target_url(stac_object: Mapping):
 def load_root_catalog_into_postgis(conn: psycopg.Connection, root_catalog: Mapping, slug: str, root_catalog_url: str) -> None:
     id = root_catalog["id"]
     params = {
-        "url": root_catalog_urls,
+        "url": root_catalog_url,
         "id": id,
         "slug": slug,
         "title": root_catalog.get("title", id),
