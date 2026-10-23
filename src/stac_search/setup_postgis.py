@@ -9,7 +9,7 @@ from psycopg.types import TypeInfo
 from pydantic import TypeAdapter
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from stac_search.ingest.traverse_files import get_collection_paths_recursively, get_item_paths, get_root_catalog_paths, maybe_load_json_object_from_file
+from stac_search.traverse_files import get_collection_paths_recursively, get_item_paths, get_root_catalog_paths, maybe_load_json_object_from_file
 from stac_search.psycopg_adapters import register_adapters
 from geojson_pydantic import GeometryCollection, Polygon
 

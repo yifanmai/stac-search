@@ -42,3 +42,5 @@ def get_stac_collection(q: str = None, bbox: Optional[str] = None) -> List[Any]:
             raise ValueError("Could not parse bbox coords as floats") from e
     with get_connection() as conn:
             return search_stac_collections(conn, q, parsed_bbox)
+
+
