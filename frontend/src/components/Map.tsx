@@ -131,29 +131,20 @@ function getGeoJSONFeatureForSTACCollection(
   stacCollection: STACCollection,
 ): Feature {
   const coords = [];
-  coords.push(fromLonLat(stacCollection.bbox.coordinates[0][0]));
-  coords.push(fromLonLat(stacCollection.bbox.coordinates[0][2]));
+  // coords.push(fromLonLat(stacCollection.bbox.coordinates[0][0]));
+  // coords.push(fromLonLat(stacCollection.bbox.coordinates[0][2]));
   const feature = new GeoJSON().readFeature(
     {
       type: "Feature",
-      geometry: {
-        type: "Polygon",
-        coordinates: [
-          [
-            [coords[0][0], coords[0][1]],
-            [coords[1][0], coords[0][1]],
-            [coords[1][0], coords[1][1]],
-            [coords[0][0], coords[1][1]],
-            [coords[0][0], coords[0][1]],
-          ],
-        ],
-      },
+      geometry: stacCollection.bbox,
       properties: {
         title: stacCollection.title,
         url: stacCollection.url,
       },
     },
-    { dataProjection: "EPSG:3857" },
+    { dataProjection: "EPSG:4326",
+      featureProjection: "EPSG:3857",
+     },
   );
   // readFeature() can return Feature or Feature[]
   // but this function should only return Feature
@@ -230,8 +221,6 @@ function updateSourceWithSTACItems(
   featuresCollection.clear();
   
   featuresCollection.extend(stacItems.map(getFeatureForSTACItem));
-  console.log(featuresCollection)
-  console.log(source.getFeaturesCollection());
 }
 
 
@@ -247,7 +236,6 @@ function viewActiveSTACCollection(
       maxZoom: 10,
       padding: [64, 64, 64, 64 + (64 + 320) * 2],
     });
-  // console.log(stacCollectionGeoJSON);
 }
 
 function viewAllSTACCollections(
