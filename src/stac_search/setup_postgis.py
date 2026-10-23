@@ -126,13 +126,12 @@ def load_item_into_postgis(conn: psycopg.Connection, item: Mapping, parent_colle
             VALUES (%(url)s, %(id)s, %(title)s, %(description)s, %(bbox)s, %(geometry)s, %(parent_collection_url)s)
             ON CONFLICT DO NOTHING""", params)
     for asset_id, asset in item.get("assets", {}).items():
-        load_item_asset_into_postgis(conn, asset, asset_id=asset_id, parent_item_url=url)
+        load_item_asset_into_postgis(conn, asset, id=asset_id, parent_item_url=url)
     
-def load_item_asset_into_postgis(conn: psycopg.Connection, asset: Mapping, asset_id: str, parent_item_url: str):
-    url = asset["href"]
+def load_item_asset_into_postgis(conn: psycopg.Connection, asset: Mapping, id: str, parent_item_url: str):
     params = {
         "url": asset["href"],
-        "id": asset_id,
+        "id": id,
         "title": asset.get("title", id),
         "description": asset.get("description", ""),
         "media_type": asset.get("type", ""),
