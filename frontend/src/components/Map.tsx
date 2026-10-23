@@ -46,27 +46,27 @@ interface OLMapState {
   cogLayer: WebGLTileLayer,
 }
 
-const stacItemStyleFunction = (feature: FeatureLike, _index: number): Style => {
-  return new Style({
-    stroke: new Stroke({
-      color: "#3399CC",
-      width: 2.5,
-    }),
-    text: new Text({
-      declutterMode: "declutter",
-      overflow: true,
-      font: "12px Calibri,sans-serif",
-      fill: new Fill({
-        color: "#3399CC",
-      }),
-      stroke: new Stroke({
-        color: "#fff",
-        width: 3,
-      }),
-      text: feature.getProperties()["title"],
-    }),
-  });
-};
+// const stacItemStyleFunction = (feature: FeatureLike, _index: number): Style => {
+//   return new Style({
+//     stroke: new Stroke({
+//       color: "#3399CC",
+//       width: 2.5,
+//     }),
+//     text: new Text({
+//       declutterMode: "declutter",
+//       overflow: true,
+//       font: "12px Calibri,sans-serif",
+//       fill: new Fill({
+//         color: "#3399CC",
+//       }),
+//       stroke: new Stroke({
+//         color: "#fff",
+//         width: 3,
+//       }),
+//       text: feature.getProperties()["title"],
+//     }),
+//   });
+// };
 
 
 const resultStyleFunction = (feature: FeatureLike, _index: number): Style => {
