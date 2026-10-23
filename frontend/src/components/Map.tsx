@@ -130,9 +130,6 @@ const extentInteraction = new ExtentInteraction({
 function getGeoJSONFeatureForSTACCollection(
   stacCollection: STACCollection,
 ): Feature {
-  const coords = [];
-  // coords.push(fromLonLat(stacCollection.bbox.coordinates[0][0]));
-  // coords.push(fromLonLat(stacCollection.bbox.coordinates[0][2]));
   const feature = new GeoJSON().readFeature(
     {
       type: "Feature",
@@ -168,7 +165,10 @@ function getFeatureForSTACItem(
         url: stacItem.url,
       },
     },
-    { dataProjection: "EPSG:3857" },
+    
+    { dataProjection: "EPSG:4326",
+      featureProjection: "EPSG:3857",
+     },
   );
   // readFeature() can return Feature or Feature[]
   // but this function should only return Feature
