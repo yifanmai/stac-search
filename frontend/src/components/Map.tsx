@@ -9,6 +9,8 @@ import type STACCollection from "../types/STACCollection";
 import GeoJSON from "ol/format/GeoJSON.js";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
+import GeoTIFFSource from "ol/source/GeoTIFF";
+import WebGLTileLayer from 'ol/layer/WebGLTile';
 import Feature from "ol/Feature";
 import type { FeatureLike } from "ol/Feature";
 import Polygon from "ol/geom/Polygon";
@@ -22,12 +24,14 @@ import { apply as applyOLMapboxStyle } from "ol-mapbox-style";
 import LayerGroup from "ol/layer/Group";
 import type BoundingBox from "../types/BoundingBox";
 import type STACItem from "../types/STACItem";
-import type { GeometryObject } from "ol/format/Feature";
+import type STACAsset from "../types/STACAsset";
+import { isCOGAsset } from "../utilities/COG";
 
 interface Props {
   stacCollections: STACCollection[];
   selectedSTACCollection: STACCollection | null;
   stacItems: STACItem[];
+  stacAssets: STACAsset[];
   clearAreaOfInterest: boolean;
   onSelectResult: (stacCollection: STACCollection) => void;
   onSelectItem: (stacItem: STACItem) => void;
@@ -39,6 +43,7 @@ interface OLMapState {
   vectorSource: VectorSource;
   featureCollection: Collection<Feature>;
   stacItemsSource: VectorSource;
+  cogLayer: WebGLTileLayer,
 }
 
 const stacItemStyleFunction = (feature: FeatureLike, _index: number): Style => {
@@ -261,6 +266,7 @@ function Map({
   selectedSTACCollection,
   stacItems,
   clearAreaOfInterest,
+  stacAssets,
   onSelectResult,
   onSelectItem,
   onExtentChanged,
@@ -315,6 +321,18 @@ function Map({
         // declutter: true,
       });
       map.addLayer(stacItemsLayer);
+
+
+    // const cogSource = new GeoTIFFSource({
+    //   sources: [
+    //     {
+    //       url: 'https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/36/Q/WD/2020/7/S2A_36QWD_20200701_0_L2A/TCI.tif',
+    //     },
+    //   ],
+    // });
+
+      const cogLayer = new WebGLTileLayer({source: undefined});
+      map.addLayer(cogLayer);
 
       map.addInteraction(selectInteraction);
       selectInteraction.on("select", (event) => {
@@ -373,6 +391,7 @@ function Map({
         vectorSource: vectorSource,
         featureCollection: featureCollection,
         stacItemsSource: stacItemsSource,
+        cogLayer: cogLayer,
       };
     }
 
@@ -411,9 +430,31 @@ function Map({
     } else if (stacCollections.length > 0) {
       viewAllSTACCollections(mapStateRef.current.map, stacCollections);
     }
+
+    if (stacAssets.length > 0) {
+      const stacAsset = findDisplayableCOGAsset(stacAssets);
+      const cogSource = new GeoTIFFSource({sources: [
+        {
+          url: stacAsset.url
+        }
+      ]});
+      mapStateRef.current.cogLayer.setSource(cogSource);
+      mapStateRef.current.cogLayer.setVisible(true);
+    } else {
+      mapStateRef.current.cogLayer.setVisible(false);
+    }
   });
 
   return <div id="map"></div>;
+}
+
+function findDisplayableCOGAsset(stacAssets: STACAsset[]) {
+  for (const stacAsset of stacAssets) {
+    if (isCOGAsset(stacAsset) && stacAsset.id === "visible") {
+      return stacAsset;
+    }
+  }
+  return stacAssets[0];
 }
 
 export default Map;

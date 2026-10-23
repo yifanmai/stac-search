@@ -112,6 +112,7 @@ export default function App() {
         stacCollections={stacCollections || []}
         selectedSTACCollection={selectedSTACCollection}
         stacItems={stacItems || []}
+        stacAssets={stacAssets || []}
         clearAreaOfInterest={clearAreaOfInterest}
         onSelectResult={onSelectResult}
         onSelectItem={onSelectItem}
