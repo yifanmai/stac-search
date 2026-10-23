@@ -10,6 +10,8 @@ import type BoundingBox from "../types/BoundingBox.ts";
 import type SearchQuery from "../types/SearchQuery.ts";
 import type STACItem from "../types/STACItem.ts";
 import getSTACItems from "../services/getSTACItems.ts";
+import getSTACItemAssets from "../services/getSTACItemAssets.ts";
+import type STACAsset from "../types/STACAsset.ts";
 
 export default function App() {
   // const [count, setCount] = useState(0)
@@ -20,6 +22,8 @@ export default function App() {
     useState<STACCollection | null>(null);
   const [selectedSTACItem, setSelectedSTACItem] =
     useState<STACItem | null>(null);
+  const [stacAssets, setSTACAssets] =
+    useState<STACAsset[] | null>(null);
   const [searchQuery, setSearchQuery] = useState<SearchQuery | null>(null);
   const [areaOfInterest, setAreaOfInterest] = useState<BoundingBox | null>(null);
   const [stacItems, setSTACItems] = useState<
@@ -56,7 +60,6 @@ export default function App() {
       if (selectedSTACCollection === null) return;
       const response = await getSTACItems(selectedSTACCollection.url, controller.signal);
       setSTACItems(response);
-      console.log(response);
     }
 
     asyncGetSTACItems();
@@ -65,13 +68,13 @@ export default function App() {
 
     // Item queries
   useEffect(() => {
-    if (selectedSTACCollection === null) return;
+    if (selectedSTACItem === null) return;
     const controller = new AbortController();
     async function asyncGetSTACItems() {
-      if (selectedSTACCollection === null) return;
-      const response = await getSTACItems(selectedSTACCollection.url, controller.signal);
-      setSTACItems(response);
+      if (selectedSTACItem === null) return;
+      const response = await getSTACItemAssets(selectedSTACItem.url, controller.signal);
       console.log(response);
+      setSTACAssets(response);
     }
 
     asyncGetSTACItems();
@@ -88,6 +91,7 @@ export default function App() {
   };
 
   const onSelectItem = (stacItem: STACItem) => {
+    console.log("selected", stacItem)
     setSelectedSTACItem(stacItem);
   };
 

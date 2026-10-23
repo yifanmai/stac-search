@@ -61,8 +61,8 @@ def get_stac_items_in_collection(conn: psycopg.Connection, collection_url: str)-
             stac_collections.append(STACItem(url=url, title=title, description=description, bbox=bbox, geometry=geometry))
     return stac_collections
 
-def get_assets_in_stac_item(conn: psycopg.Connection, item_url: str)-> List[STACCollection]:
-    query = "SELECT url, id, title, description, media_type FROM stac_item_assets WHERE parent_item_url = %(parent_collection_url)s LIMIT 100 ;"
+def get_stac_assets_in_item(conn: psycopg.Connection, item_url: str)-> List[STACAsset]:
+    query = "SELECT url, id, title, description, media_type FROM stac_item_assets WHERE parent_item_url = %(parent_item_url)s LIMIT 100 ;"
     query_params = {"parent_item_url": item_url}
     stac_collections = []
     with conn.cursor() as cur:

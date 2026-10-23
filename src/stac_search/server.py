@@ -10,7 +10,7 @@ from pydantic import BaseModel
 import psycopg
 
 from stac_search.config import get_settings
-from stac_search.item_search import get_stac_items_in_collection
+from stac_search.item_search import get_stac_assets_in_item, get_stac_items_in_collection
 from stac_search.psycopg_adapters import register_adapters
 from stac_search.collection_search import search_stac_collections
 from stac_search.types import BoundingBox, STACCollection
@@ -60,5 +60,5 @@ def get_assets(url: str) -> List[Any]:
     with get_connection() as conn:
         info = TypeInfo.fetch(conn, "geometry")
         register_adapters(info, conn)
-        return get_stac_items_in_collection(conn, url)
-    
+        return get_stac_assets_in_item(conn, url)
+

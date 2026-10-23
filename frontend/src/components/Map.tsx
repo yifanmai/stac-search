@@ -268,10 +268,16 @@ function Map({
   const mapRef = useRef<OLMap | null>(null);
   const mapStateRef = useRef<OLMapState | null>(null);
   const stacCollectionsRef = useRef<STACCollection[]>(stacCollections);
+  const stacItemsRef = useRef<STACItem[]>(stacItems);
   const ignoreNextEffect = useRef<boolean>(false);
 
   useEffect(() => {
+    // We need to do this, because otherwise the closure scope captures
+    // a stale stacCollections.
+    // See the comments in the `selectInteraction` handler.
     stacCollectionsRef.current = stacCollections;
+    stacItemsRef.current = stacItems;
+    
     if (!mapStateRef.current) {
       const openFreeMapLayerGroup = new LayerGroup();
       applyOLMapboxStyle(
@@ -327,6 +333,11 @@ function Map({
           ) {
             return;
           }
+          // We have to use `stacCollectionsRef.current` here as a level of indirection.
+          // If we used `stacCollections` directly, it will captures the value of `stacCollections`
+          // at the time of creation of the `selectInteraction` handler, which means that
+          // we will get a stale value of `stacCollections` rather than the current one.
+          // We avoid this by using indirection.
           for (const stacCollection of stacCollectionsRef.current) {
             if (stacCollection.url == selectedSTACCollectionURL) {
               onSelectResult(stacCollection);
@@ -335,7 +346,8 @@ function Map({
           }
         } else if (selectedFeatureType === "item") {
           const selectedSTACItemURL = selectedFeature.getProperties()["url"];
-          for (const stacItem of stacItems) {
+          // See the comments above regarding using indirection to avoid closure capture.
+          for (const stacItem of stacItemsRef.current) {
             if (stacItem.url == selectedSTACItemURL) {
               onSelectItem(stacItem);
               return;
