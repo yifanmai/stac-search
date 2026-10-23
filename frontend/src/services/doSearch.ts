@@ -1,7 +1,7 @@
 import type SearchQuery from "../types/SearchQuery";
 import type STACCollection from "../types/STACCollection";
 
-const SEARCH_URL = "http://localhost:8000/stac/collection";
+const SEARCH_URL = "/stac/collection";
 
 export default async function doSearch(
   searchQuery: SearchQuery,

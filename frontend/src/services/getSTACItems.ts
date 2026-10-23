@@ -1,6 +1,6 @@
 import type STACItem from "../types/STACItem";
 
-const SEARCH_URL = "http://localhost:8000/stac/collection/items";
+const SEARCH_URL = "/stac/collection/items";
 
 export default async function getSTACItems(
   stacCollectionURL: string,
