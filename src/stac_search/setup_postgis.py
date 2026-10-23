@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 from typing import Mapping
@@ -10,7 +9,12 @@ from pydantic import TypeAdapter
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from stac_search.geometry import geometry_to_bounding_box, bbox_to_polygon
-from stac_search.traverse_files import get_collection_paths_recursively, get_item_paths, get_root_catalog_paths, maybe_load_json_object_from_file
+from stac_search.traverse_files import (
+    get_collection_paths_recursively,
+    get_item_paths,
+    get_root_catalog_paths,
+    maybe_load_json_object_from_file,
+)
 from stac_search.psycopg_adapters import register_adapters
 from geojson_pydantic import Polygon
 
@@ -18,6 +22,7 @@ from geojson_pydantic import Polygon
 CATALOGS_DIR_PATH = Path("/home/yifanmai/oss/stac-catalogs-2026-10-22")
 
 ENV_PREFIX = "STAC_SEARCH_"
+
 
 # TODO: Deduplicate this with config.py
 class DatabaseSettings(BaseSettings):
@@ -30,26 +35,38 @@ class DatabaseSettings(BaseSettings):
         cli_exit_on_error=True,
     )
 
+
 def load_into_postgis(conn: psycopg.Connection):
     for root_catalog_path in get_root_catalog_paths(CATALOGS_DIR_PATH):
         root_catalog = maybe_load_json_object_from_file(root_catalog_path)
         slug = root_catalog_path.parent.name
         root_catalog_url = get_crawl_target_url(root_catalog)
         try:
-            load_root_catalog_into_postgis(conn=conn, root_catalog=root_catalog, slug=slug, root_catalog_url=root_catalog_url)
+            load_root_catalog_into_postgis(
+                conn=conn,
+                root_catalog=root_catalog,
+                slug=slug,
+                root_catalog_url=root_catalog_url,
+            )
             for collection_path in get_collection_paths_recursively(root_catalog_path):
                 collection = maybe_load_json_object_from_file(collection_path)
                 collection_url = get_crawl_target_url(collection)
-                load_collection_into_postgis(conn=conn, collection=collection, root_catalog_url=root_catalog_url, collection_url=collection_url)
+                load_collection_into_postgis(
+                    conn=conn,
+                    collection=collection,
+                    root_catalog_url=root_catalog_url,
+                    collection_url=collection_url,
+                )
                 for item_path in get_item_paths(collection_path):
                     item = maybe_load_json_object_from_file(item_path)
                     if not item:
                         continue
-                    load_item_into_postgis(conn, item, parent_collection_url=collection_url)
+                    load_item_into_postgis(
+                        conn, item, parent_collection_url=collection_url
+                    )
         except Exception as e:
             print(f"ERROR: could not load root catalog {slug}")
             print(e)
-
 
 
 def get_crawl_target_url(stac_object: Mapping):
@@ -58,25 +75,35 @@ def get_crawl_target_url(stac_object: Mapping):
             return link["href"]
     raise Exception("Could not find crawl target URL")
 
-def load_root_catalog_into_postgis(conn: psycopg.Connection, root_catalog: Mapping, slug: str, root_catalog_url: str) -> None:
+
+def load_root_catalog_into_postgis(
+    conn: psycopg.Connection, root_catalog: Mapping, slug: str, root_catalog_url: str
+) -> None:
     id = root_catalog["id"]
     params = {
         "url": root_catalog_url,
         "id": id,
         "slug": slug,
         "title": root_catalog.get("title", id),
-        "description": root_catalog.get("description", "")
+        "description": root_catalog.get("description", ""),
     }
     with conn.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO
                 stac_root_catalogs (url, slug, id, title, description)
             VALUES (%(url)s, %(slug)s, %(id)s, %(title)s, %(description)s)
-            ON CONFLICT DO NOTHING""", params)
+            ON CONFLICT DO NOTHING""",
+            params,
+        )
 
 
-
-def load_collection_into_postgis(conn: psycopg.Connection, collection: Mapping, root_catalog_url: str, collection_url: str) -> None:
+def load_collection_into_postgis(
+    conn: psycopg.Connection,
+    collection: Mapping,
+    root_catalog_url: str,
+    collection_url: str,
+) -> None:
     id = collection["id"]
     bbox = collection["extent"]["spatial"]["bbox"][0]
     bbox_polygon = bbox_to_polygon(bbox)
@@ -89,14 +116,19 @@ def load_collection_into_postgis(conn: psycopg.Connection, collection: Mapping, 
         "root_catalog_url": root_catalog_url,
     }
     with conn.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO
                 stac_collections (url, id, title, description, bbox, root_catalog_url)
             VALUES (%(url)s, %(id)s, %(title)s, %(description)s, %(bbox)s, %(root_catalog_url)s)
-            ON CONFLICT DO NOTHING""", params)
+            ON CONFLICT DO NOTHING""",
+            params,
+        )
 
 
-def load_item_into_postgis(conn: psycopg.Connection, item: Mapping, parent_collection_url: str) -> None:
+def load_item_into_postgis(
+    conn: psycopg.Connection, item: Mapping, parent_collection_url: str
+) -> None:
     url = get_crawl_target_url(item)
     id = item["id"]
 
@@ -124,30 +156,38 @@ def load_item_into_postgis(conn: psycopg.Connection, item: Mapping, parent_colle
         "parent_collection_url": parent_collection_url,
     }
     with conn.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO
                 stac_items (url, id, title, description, bbox, geometry, parent_collection_url)
             VALUES (%(url)s, %(id)s, %(title)s, %(description)s, %(bbox)s, %(geometry)s, %(parent_collection_url)s)
-            ON CONFLICT DO NOTHING""", params)
+            ON CONFLICT DO NOTHING""",
+            params,
+        )
     for asset_id, asset in item.get("assets", {}).items():
         load_item_asset_into_postgis(conn, asset, id=asset_id, parent_item_url=url)
-    
-def load_item_asset_into_postgis(conn: psycopg.Connection, asset: Mapping, id: str, parent_item_url: str) -> None:
+
+
+def load_item_asset_into_postgis(
+    conn: psycopg.Connection, asset: Mapping, id: str, parent_item_url: str
+) -> None:
     params = {
         "url": asset["href"],
         "id": id,
         "title": asset.get("title", id),
         "description": asset.get("description", ""),
         "media_type": asset.get("type", ""),
-        "parent_item_url": parent_item_url
+        "parent_item_url": parent_item_url,
     }
     with conn.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO
                 stac_item_assets (url, id, title, description, media_type, parent_item_url)
             VALUES (%(url)s, %(id)s, %(title)s, %(description)s, %(media_type)s, %(parent_item_url)s)
-            ON CONFLICT DO NOTHING""", params)
-
+            ON CONFLICT DO NOTHING""",
+            params,
+        )
 
 
 def create_tables(conn: psycopg.Connection) -> None:
@@ -192,7 +232,7 @@ def create_tables(conn: psycopg.Connection) -> None:
                 parent_item_url text NOT NULL REFERENCES stac_items(url)
             );
         """)
-    
+
 
 def main():
     settings = DatabaseSettings()

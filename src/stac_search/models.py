@@ -12,7 +12,6 @@ class STACCollection(BaseModel):
     bbox: Polygon
 
 
-
 class STACItem(BaseModel):
     url: str
     title: str
@@ -27,5 +26,6 @@ class STACAsset(BaseModel):
     title: str
     description: str
     media_type: str
+
 
 BoundingBox = Tuple[float, float, float, float]

@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ENV_PREFIX = "STAC_SEARCH_"
 
+
 class Settings(BaseSettings):
     postgis_connection_string: str
     port: int = 8000
@@ -16,7 +17,6 @@ class Settings(BaseSettings):
         # NOTE: This doesn't seem to do anything...
         cli_exit_on_error=True,
     )
-
 
 
 SETTINGS: Optional[Settings] = None
