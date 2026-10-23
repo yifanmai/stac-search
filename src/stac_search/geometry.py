@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Sequence
 
 from geojson_pydantic import GeometryCollection, LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon
 from geojson_pydantic.geometries import Geometry
@@ -30,3 +30,14 @@ def geometry_to_bounding_box(geometry: Geometry) -> BoundingBox:
         return combine_bboxes([geometry_to_bounding_box(child_geometry) for child_geometry in geometry.geometries])
     else:
         raise Exception("Not an area type")
+
+
+def bbox_to_polygon(raw_bbox: Sequence[float]) -> Polygon:
+    """Given a bounding box that is 2D (4 elements) or 3D (6 elements), returns a polygon in which all positions are 2D"""
+    num_coords = len(raw_bbox)
+    if num_coords == 4:
+        return Polygon.from_bounds(raw_bbox[0], raw_bbox[1], raw_bbox[2], raw_bbox[3])
+    elif num_coords == 6:
+        return Polygon.from_bounds(raw_bbox[0], raw_bbox[1], raw_bbox[3], raw_bbox[4])
+    else:
+        raise Exception("Bounding box must have 4 or 6 numbers")

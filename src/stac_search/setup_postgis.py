@@ -9,7 +9,7 @@ from psycopg.types import TypeInfo
 from pydantic import TypeAdapter
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from stac_search.geometry import geometry_to_bounding_box
+from stac_search.geometry import geometry_to_bounding_box, bbox_to_polygon
 from stac_search.traverse_files import get_collection_paths_recursively, get_item_paths, get_root_catalog_paths, maybe_load_json_object_from_file
 from stac_search.psycopg_adapters import register_adapters
 from geojson_pydantic import Polygon
@@ -75,7 +75,7 @@ def load_root_catalog_into_postgis(conn: psycopg.Connection, root_catalog: Mappi
 def load_collection_into_postgis(conn: psycopg.Connection, collection: Mapping, root_catalog_url: str, collection_url: str):
     id = collection["id"]
     bbox = collection["extent"]["spatial"]["bbox"][0]
-    bbox_polygon = Polygon.from_bounds(*bbox)
+    bbox_polygon = bbox_to_polygon(bbox)
     params = {
         "url": collection_url,
         "id": id,
@@ -99,7 +99,7 @@ def load_item_into_postgis(conn: psycopg.Connection, item: Mapping, parent_colle
     if item.get("geometry"):
         geometry = TypeAdapter(Geometry).validate_python(item["geometry"])
     elif item.get("bbox"):
-        geometry = Polygon.from_bounds(*item["bbox"])
+        geometry = bbox_to_polygon(item["bbox"])
     else:
         raise Exception("Item has no bbox or geometry")
 
@@ -108,7 +108,7 @@ def load_item_into_postgis(conn: psycopg.Connection, item: Mapping, parent_colle
     else:
         bbox = geometry_to_bounding_box(geometry)
 
-    bbox_polygon = Polygon.from_bounds(*bbox)
+    bbox_polygon = bbox_to_polygon(bbox)
 
     params = {
         "url": url,
