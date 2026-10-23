@@ -135,6 +135,7 @@ function getGeoJSONFeatureForSTACCollection(
       type: "Feature",
       geometry: stacCollection.bbox,
       properties: {
+        type: "collection",
         title: stacCollection.title,
         url: stacCollection.url,
       },
@@ -161,6 +162,7 @@ function getFeatureForSTACItem(
       type: "Feature",
       geometry: geometry,
       properties: {
+        type: "item",
         title: stacItem.title,
         url: stacItem.url,
       },
@@ -313,18 +315,20 @@ function Map({
           return;
         }
         const selectedFeature = selectedFeatures[0];
-        const selectedSTACCollectionURL =
-          selectedFeature.getProperties()["url"];
-        if (
-          selectedSTACCollection &&
-          selectedSTACCollection.url === selectedSTACCollectionURL
-        ) {
-          return;
-        }
-        for (const stacCollection of stacCollectionsRef.current) {
-          if (stacCollection.url == selectedSTACCollectionURL) {
-            onSelectResult(stacCollection);
+        if (selectedFeature.getProperties()["type"] === "collection") {
+          const selectedSTACCollectionURL =
+            selectedFeature.getProperties()["url"];
+          if (
+            selectedSTACCollection &&
+            selectedSTACCollection.url === selectedSTACCollectionURL
+          ) {
             return;
+          }
+          for (const stacCollection of stacCollectionsRef.current) {
+            if (stacCollection.url == selectedSTACCollectionURL) {
+              onSelectResult(stacCollection);
+              return;
+            }
           }
         }
       });
