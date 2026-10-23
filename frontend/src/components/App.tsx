@@ -8,6 +8,8 @@ import STACCollectionInfoBox from "./STACCollectionInfoBox.tsx";
 import doSearch from "../services/doSearch.ts";
 import type BoundingBox from "../types/BoundingBox.ts";
 import type SearchQuery from "../types/SearchQuery.ts";
+import type STACItem from "../types/STACItem.ts";
+import getSTACItems from "../services/getSTACItems.ts";
 
 export default function App() {
   // const [count, setCount] = useState(0)
@@ -18,6 +20,9 @@ export default function App() {
     useState<STACCollection | null>(null);
   const [searchQuery, setSearchQuery] = useState<SearchQuery | null>(null);
   const [areaOfInterest, setAreaOfInterest] = useState<BoundingBox | null>(null);
+  const [stacItems, setSTACItems] = useState<
+    STACItem[] | null
+  >(null);
 
   // Hacky way to clear the area of interest from Map from the button on SearchQueryBox.
   // SearchQueryBox will sends an event that sets this to true.
@@ -25,6 +30,7 @@ export default function App() {
   // that sets it back to false.
   const [clearAreaOfInterest, setClearAreaOfInterest] = useState<boolean>(false);
 
+  // Search queries
   useEffect(() => {
     if (searchQuery === null) return;
     const controller = new AbortController();
@@ -38,6 +44,23 @@ export default function App() {
     asyncDoSearch();
     return () => controller.abort();
   }, [searchQuery]);
+
+
+  // Item queries
+  useEffect(() => {
+    if (selectedSTACCollection === null) return;
+    const controller = new AbortController();
+    async function asyncGetSTACItems() {
+      if (selectedSTACCollection === null) return;
+      const response = await getSTACItems(selectedSTACCollection.url, controller.signal);
+      setSTACItems(response);
+      console.log(response);
+    }
+
+    asyncGetSTACItems();
+    return () => controller.abort();
+  }, [selectedSTACCollection]);
+
 
   const onSearchQuery = (searchQuery: SearchQuery) => {
     setSearchQuery(searchQuery);
@@ -63,6 +86,7 @@ export default function App() {
       <Map
         stacCollections={stacCollections || []}
         selectedSTACCollection={selectedSTACCollection}
+        stacItems={stacItems || []}
         clearAreaOfInterest={clearAreaOfInterest}
         onSelectResult={onSelectResult}
         onExtentChanged={onExtentChanged}

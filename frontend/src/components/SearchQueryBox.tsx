@@ -27,11 +27,8 @@ export default function SearchQueryBox({ areaOfInterest, onSearchQuery, onClearA
   const onClickClearQueryOfInterestLink  = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     onClearAreaOfInterest();
-    console.log("clicked");
   };
   
-
-  console.log(areaOfInterest);
   return (
     <form id="searchbox">
       <h1>STAC Search</h1>

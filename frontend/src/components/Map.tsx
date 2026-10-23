@@ -21,10 +21,13 @@ import Select from "ol/interaction/Select";
 import { apply as applyOLMapboxStyle } from "ol-mapbox-style";
 import LayerGroup from "ol/layer/Group";
 import type BoundingBox from "../types/BoundingBox";
+import type STACItem from "../types/STACItem";
+import type { GeometryObject } from "ol/format/Feature";
 
 interface Props {
   stacCollections: STACCollection[];
   selectedSTACCollection: STACCollection | null;
+  stacItems: STACItem[];
   clearAreaOfInterest: boolean;
   onSelectResult: (stacCollection: STACCollection) => void;
   onExtentChanged: (bbox: BoundingBox | null) => void;
@@ -34,7 +37,31 @@ interface OLMapState {
   map: OLMap;
   vectorSource: VectorSource;
   featureCollection: Collection<Feature>;
+  stacItemsSource: VectorSource;
 }
+
+const stacItemStyleFunction = (feature: FeatureLike, _index: number): Style => {
+  return new Style({
+    stroke: new Stroke({
+      color: "#3399CC",
+      width: 2.5,
+    }),
+    text: new Text({
+      declutterMode: "declutter",
+      overflow: true,
+      font: "12px Calibri,sans-serif",
+      fill: new Fill({
+        color: "#3399CC",
+      }),
+      stroke: new Stroke({
+        color: "#fff",
+        width: 3,
+      }),
+      text: feature.getProperties()["title"],
+    }),
+  });
+};
+
 
 const resultStyleFunction = (feature: FeatureLike, _index: number): Style => {
   return new Style({
@@ -128,7 +155,6 @@ function getGeoJSONFeatureForSTACCollection(
     },
     { dataProjection: "EPSG:3857" },
   );
-  console.log(feature);
   // readFeature() can return Feature or Feature[]
   // but this function should only return Feature
   if (feature instanceof Feature) {
@@ -137,6 +163,31 @@ function getGeoJSONFeatureForSTACCollection(
     return feature[0];
   }
 }
+
+function getFeatureForSTACItem(
+  stacItem: STACItem,
+): Feature {
+  const geometry = stacItem.geometry;
+  const feature = new GeoJSON().readFeature(
+    {
+      type: "Feature",
+      geometry: geometry,
+      properties: {
+        title: stacItem.title,
+        url: stacItem.url,
+      },
+    },
+    { dataProjection: "EPSG:3857" },
+  );
+  // readFeature() can return Feature or Feature[]
+  // but this function should only return Feature
+  if (feature instanceof Feature) {
+    return feature;
+  } else {
+    return feature[0];
+  }
+}
+
 
 function getPolygonForSTACCollection(stacCollection: STACCollection): Polygon {
   const coords = [];
@@ -164,10 +215,25 @@ function setFeaturesFromSTACCollections(
   featureCollection: Collection<Feature>,
   stacCollections: STACCollection[],
 ): void {
-  const features = stacCollections.map(getGeoJSONFeatureForSTACCollection);
   featureCollection.clear();
-  featureCollection.extend(features);
+  const collectionFeatures = stacCollections.map(getGeoJSONFeatureForSTACCollection);
+  featureCollection.extend(collectionFeatures);
 }
+
+
+function updateSourceWithSTACItems(
+  source: VectorSource,
+  stacItems: STACItem[],
+): void {
+  const featuresCollection = source.getFeaturesCollection()
+  if (featuresCollection === null) return;
+  featuresCollection.clear();
+  
+  featuresCollection.extend(stacItems.map(getFeatureForSTACItem));
+  console.log(featuresCollection)
+  console.log(source.getFeaturesCollection());
+}
+
 
 function viewActiveSTACCollection(
   map: OLMap,
@@ -202,6 +268,7 @@ function viewAllSTACCollections(
 function Map({
   stacCollections,
   selectedSTACCollection,
+  stacItems,
   clearAreaOfInterest,
   onSelectResult,
   onExtentChanged,
@@ -209,7 +276,7 @@ function Map({
   const mapRef = useRef<OLMap | null>(null);
   const mapStateRef = useRef<OLMapState | null>(null);
   const stacCollectionsRef = useRef<STACCollection[]>(stacCollections);
-  const ignoreNextEffect = useRef<bool>(false);
+  const ignoreNextEffect = useRef<boolean>(false);
 
   useEffect(() => {
     stacCollectionsRef.current = stacCollections;
@@ -238,10 +305,20 @@ function Map({
         style: resultStyleFunction,
         declutter: true,
       });
-
       map.addLayer(vectorLayer);
+
+      const stacItemsFeatureCollection = new Collection<Feature>();
+      const stacItemsSource = new VectorSource({
+        features: stacItemsFeatureCollection,
+      });
+      const stacItemsLayer = new VectorLayer({
+        source: stacItemsSource,
+        // style: stacItemStyleFunction,
+        // declutter: true,
+      });
+      map.addLayer(stacItemsLayer);
+
       map.addInteraction(selectInteraction);
-      map.addInteraction(extentInteraction);
       selectInteraction.on("select", (event) => {
         const selectedFeatures = event.target.getFeatures().getArray();
         if (selectedFeatures.length !== 1) {
@@ -263,6 +340,8 @@ function Map({
           }
         }
       });
+
+      map.addInteraction(extentInteraction);
       extentInteraction.on("extentchanged", (event) => {
         if (event.extent === null) {
           onExtentChanged(null);
@@ -272,10 +351,12 @@ function Map({
           onExtentChanged([bbox[0], bbox[1], bbox[2], bbox[3]]);
         }
       });
+
       mapStateRef.current = {
         map: map,
         vectorSource: vectorSource,
         featureCollection: featureCollection,
+        stacItemsSource: stacItemsSource,
       };
     }
 
@@ -293,12 +374,15 @@ function Map({
       return;
     }
 
-    console.log("redozoom")
-
     setFeaturesFromSTACCollections(
       mapStateRef.current.featureCollection,
       stacCollections,
     );
+
+    updateSourceWithSTACItems(
+      mapStateRef.current.stacItemsSource,
+      stacItems,
+    )
 
     if (selectedSTACCollection) {
       for (const feature of mapStateRef.current.vectorSource.getFeatures()) {
