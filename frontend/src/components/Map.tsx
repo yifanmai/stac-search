@@ -30,6 +30,7 @@ interface Props {
   stacItems: STACItem[];
   clearAreaOfInterest: boolean;
   onSelectResult: (stacCollection: STACCollection) => void;
+  onSelectItem: (stacItem: STACItem) => void;
   onExtentChanged: (bbox: BoundingBox | null) => void;
 }
 
@@ -261,6 +262,7 @@ function Map({
   stacItems,
   clearAreaOfInterest,
   onSelectResult,
+  onSelectItem,
   onExtentChanged,
 }: Props) {
   const mapRef = useRef<OLMap | null>(null);
@@ -315,7 +317,8 @@ function Map({
           return;
         }
         const selectedFeature = selectedFeatures[0];
-        if (selectedFeature.getProperties()["type"] === "collection") {
+        const selectedFeatureType = selectedFeature.getProperties()["type"];
+        if (selectedFeatureType === "collection") {
           const selectedSTACCollectionURL =
             selectedFeature.getProperties()["url"];
           if (
@@ -330,6 +333,15 @@ function Map({
               return;
             }
           }
+        } else if (selectedFeatureType === "item") {
+          const selectedSTACItemURL = selectedFeature.getProperties()["url"];
+          for (const stacItem of stacItems) {
+            if (stacItem.url == selectedSTACItemURL) {
+              onSelectItem(stacItem);
+              return;
+            }
+          }
+          
         }
       });
 

@@ -18,6 +18,8 @@ export default function App() {
   >(null);
   const [selectedSTACCollection, setSelectedSTACCollection] =
     useState<STACCollection | null>(null);
+  const [selectedSTACItem, setSelectedSTACItem] =
+    useState<STACItem | null>(null);
   const [searchQuery, setSearchQuery] = useState<SearchQuery | null>(null);
   const [areaOfInterest, setAreaOfInterest] = useState<BoundingBox | null>(null);
   const [stacItems, setSTACItems] = useState<
@@ -61,6 +63,21 @@ export default function App() {
     return () => controller.abort();
   }, [selectedSTACCollection]);
 
+    // Item queries
+  useEffect(() => {
+    if (selectedSTACCollection === null) return;
+    const controller = new AbortController();
+    async function asyncGetSTACItems() {
+      if (selectedSTACCollection === null) return;
+      const response = await getSTACItems(selectedSTACCollection.url, controller.signal);
+      setSTACItems(response);
+      console.log(response);
+    }
+
+    asyncGetSTACItems();
+    return () => controller.abort();
+  }, [selectedSTACItem]);
+
 
   const onSearchQuery = (searchQuery: SearchQuery) => {
     setSearchQuery(searchQuery);
@@ -68,6 +85,10 @@ export default function App() {
 
   const onSelectResult = (stacCollection: STACCollection) => {
     setSelectedSTACCollection(stacCollection);
+  };
+
+  const onSelectItem = (stacItem: STACItem) => {
+    setSelectedSTACItem(stacItem);
   };
 
   const onExtentChanged = (bbox: BoundingBox | null) => {
@@ -89,6 +110,7 @@ export default function App() {
         stacItems={stacItems || []}
         clearAreaOfInterest={clearAreaOfInterest}
         onSelectResult={onSelectResult}
+        onSelectItem={onSelectItem}
         onExtentChanged={onExtentChanged}
       ></Map>
 
