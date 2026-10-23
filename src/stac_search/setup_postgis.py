@@ -236,7 +236,7 @@ def create_tables(conn: psycopg.Connection) -> None:
 
 def main():
     settings = DatabaseSettings()
-    with psycopg.connect(settings.postgis_connection_string) as conn:
+    with psycopg.connect(settings.postgis_connection_string, autocommit=True) as conn:
         type_info = TypeInfo.fetch(conn, "geometry")
         register_adapters(type_info, conn)
         create_tables(conn)
