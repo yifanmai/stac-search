@@ -35,16 +35,20 @@ def load_into_postgis(conn: psycopg.Connection):
         root_catalog = maybe_load_json_object_from_file(root_catalog_path)
         slug = root_catalog_path.parent.name
         root_catalog_url = get_crawl_target_url(root_catalog)
-        load_root_catalog_into_postgis(conn=conn, root_catalog=root_catalog, slug=slug, root_catalog_url=root_catalog_url)
-        for collection_path in get_collection_paths_recursively(root_catalog_path):
-            collection = maybe_load_json_object_from_file(collection_path)
-            collection_url = get_crawl_target_url(collection)
-            load_collection_into_postgis(conn=conn, collection=collection, root_catalog_url=root_catalog_url, collection_url=collection_url)
-            for item_path in get_item_paths(collection_path):
-                item = maybe_load_json_object_from_file(item_path)
-                if not item:
-                    continue
-                load_item_into_postgis(conn, item, parent_collection_url=collection_url)
+        try:
+            load_root_catalog_into_postgis(conn=conn, root_catalog=root_catalog, slug=slug, root_catalog_url=root_catalog_url)
+            for collection_path in get_collection_paths_recursively(root_catalog_path):
+                collection = maybe_load_json_object_from_file(collection_path)
+                collection_url = get_crawl_target_url(collection)
+                load_collection_into_postgis(conn=conn, collection=collection, root_catalog_url=root_catalog_url, collection_url=collection_url)
+                for item_path in get_item_paths(collection_path):
+                    item = maybe_load_json_object_from_file(item_path)
+                    if not item:
+                        continue
+                    load_item_into_postgis(conn, item, parent_collection_url=collection_url)
+        except Exception as e:
+            print(f"ERROR: could not load root catalog {slug}")
+            print(e)
 
 
 
@@ -54,10 +58,10 @@ def get_crawl_target_url(stac_object: Mapping):
             return link["href"]
     raise Exception("Could not find crawl target URL")
 
-def load_root_catalog_into_postgis(conn: psycopg.Connection, root_catalog: Mapping, slug: str, root_catalog_url: str):
+def load_root_catalog_into_postgis(conn: psycopg.Connection, root_catalog: Mapping, slug: str, root_catalog_url: str) -> None:
     id = root_catalog["id"]
     params = {
-        "url": get_crawl_target_url(root_catalog),
+        "url": root_catalog_urls,
         "id": id,
         "slug": slug,
         "title": root_catalog.get("title", id),
@@ -72,7 +76,7 @@ def load_root_catalog_into_postgis(conn: psycopg.Connection, root_catalog: Mappi
 
 
 
-def load_collection_into_postgis(conn: psycopg.Connection, collection: Mapping, root_catalog_url: str, collection_url: str):
+def load_collection_into_postgis(conn: psycopg.Connection, collection: Mapping, root_catalog_url: str, collection_url: str) -> None:
     id = collection["id"]
     bbox = collection["extent"]["spatial"]["bbox"][0]
     bbox_polygon = bbox_to_polygon(bbox)
@@ -92,7 +96,7 @@ def load_collection_into_postgis(conn: psycopg.Connection, collection: Mapping, 
             ON CONFLICT DO NOTHING""", params)
 
 
-def load_item_into_postgis(conn: psycopg.Connection, item: Mapping, parent_collection_url: str):
+def load_item_into_postgis(conn: psycopg.Connection, item: Mapping, parent_collection_url: str) -> None:
     url = get_crawl_target_url(item)
     id = item["id"]
 
@@ -128,7 +132,7 @@ def load_item_into_postgis(conn: psycopg.Connection, item: Mapping, parent_colle
     for asset_id, asset in item.get("assets", {}).items():
         load_item_asset_into_postgis(conn, asset, id=asset_id, parent_item_url=url)
     
-def load_item_asset_into_postgis(conn: psycopg.Connection, asset: Mapping, id: str, parent_item_url: str):
+def load_item_asset_into_postgis(conn: psycopg.Connection, asset: Mapping, id: str, parent_item_url: str) -> None:
     params = {
         "url": asset["href"],
         "id": id,
@@ -146,7 +150,7 @@ def load_item_asset_into_postgis(conn: psycopg.Connection, asset: Mapping, id: s
 
 
 
-def create_tables(conn: psycopg.Connection):
+def create_tables(conn: psycopg.Connection) -> None:
     with conn.cursor() as cursor:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS stac_root_catalogs(
