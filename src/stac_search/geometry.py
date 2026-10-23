@@ -4,7 +4,7 @@ from geojson_pydantic import GeometryCollection, LineString, MultiLineString, Mu
 from geojson_pydantic.geometries import Geometry
 from geojson_pydantic.types import Position, Position2D
 
-from stac_search.types import BoundingBox
+from stac_search.models import BoundingBox
 
 
 def combine_bboxes(bboxes: BoundingBox) -> BoundingBox:

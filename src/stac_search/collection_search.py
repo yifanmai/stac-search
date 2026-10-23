@@ -11,7 +11,7 @@ import psycopg
 
 from stac_search.psycopg_adapters import register_adapters
 from stac_search.config import get_settings
-from stac_search.types import BoundingBox, STACCollection
+from stac_search.models import BoundingBox, STACCollection
 from stac_search.psycopg_adapters import register_adapters
 
 

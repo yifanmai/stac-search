@@ -28,6 +28,4 @@ class STACAsset(BaseModel):
     description: str
     media_type: str
 
-
-
 BoundingBox = Tuple[float, float, float, float]
