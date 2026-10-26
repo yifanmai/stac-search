@@ -98,7 +98,7 @@ export default function App() {
     setSearchQuery(searchQuery);
   };
 
-  const onSelectResult = (stacCollection: STACCollection) => {
+  const onSelectSTACCollection = (stacCollection: STACCollection) => {
     setMapAnimationRequest(
       MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION,
     );
@@ -126,7 +126,7 @@ export default function App() {
         stacAssets={stacAssets || []}
         mapAnimationRequest={mapAnimationRequest}
         clearExtentRequest={clearExtentRequest}
-        onSelectResult={onSelectResult}
+        onSelectSTACCollection={onSelectSTACCollection}
         onSelectItem={onSelectItem}
         onMapAnimationStarted={() => setMapAnimationRequest(null)}
         onExtentChanged={onExtentChanged}
@@ -143,7 +143,7 @@ export default function App() {
             <SearchResultsBox
               stacCollections={stacCollections}
               selectedSTACCollection={selectedSTACCollection}
-              onSelectResult={onSelectResult}
+              onSelectSTACCollection={onSelectSTACCollection}
             ></SearchResultsBox>
           ) : null}
         </div>

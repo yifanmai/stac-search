@@ -34,7 +34,7 @@ interface Props {
   selectedSTACCollection: STACCollection | null;
   mapAnimationRequest: MapAnimationRequest | null;
   clearExtentRequest: boolean;
-  onSelectResult: (stacCollection: STACCollection) => void;
+  onSelectSTACCollection: (stacCollection: STACCollection) => void;
   onSelectItem: (stacItem: STACItem) => void;
   onExtentChanged: (bbox: BoundingBox | null) => void;
   onMapAnimationStarted: () => void;
@@ -53,7 +53,7 @@ function Map({
   stacAssets,
   selectedSTACCollection,
   mapAnimationRequest,
-  onSelectResult,
+  onSelectSTACCollection: onSelectResult,
   onSelectItem,
   onMapAnimationStarted,
   onExtentChanged,
@@ -101,7 +101,7 @@ function Map({
         ) {
           return;
         }
-        onSelectResult(selectedFeatureSTACCollection);
+        onSelectResult(selectedFeatureSTACCollection);  
       });
 
       map.addInteraction(extentInteraction);

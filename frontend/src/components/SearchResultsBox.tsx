@@ -4,13 +4,13 @@ import STACCollectionCard from "./STACCollectionCard";
 interface Props {
   stacCollections: STACCollection[] | null;
   selectedSTACCollection: STACCollection | null;
-  onSelectResult: (stacCollection: STACCollection) => void;
+  onSelectSTACCollection: (stacCollection: STACCollection) => void;
 }
 
 export default function SearchResultsBox({
   stacCollections,
   selectedSTACCollection,
-  onSelectResult,
+  onSelectSTACCollection: onSelectResult,
 }: Props) {
   return (
     <div className="search-results">
