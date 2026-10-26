@@ -75,8 +75,6 @@ function Map({
   const stacItemsRef = useRef<STACItem[]>(stacItems);
 
   useEffect(() => {
-    console.log(mapAnimationRequest);
-
     // We need to do this, because otherwise the closure scope captures
     // a stale stacCollections.
     // See the comments in the `selectInteraction` handler.

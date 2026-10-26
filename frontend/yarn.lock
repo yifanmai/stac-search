@@ -786,6 +786,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/trusted-types@npm:^2.0.7":
+  version: 2.0.7
+  resolution: "@types/trusted-types@npm:2.0.7"
+  checksum: 10c0/4c4855f10de7c6c135e0d32ce462419d8abbbc33713b31d294596c0cc34ae1fa6112a2f9da729c8f7a20707782b0d69da3b1f8df6645b0366d08825ca1522e0c
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/eslint-plugin@npm:8.71.1":
   version: 8.71.1
   resolution: "@typescript-eslint/eslint-plugin@npm:8.71.1"
@@ -1116,6 +1123,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dompurify@npm:^3.4.17":
+  version: 3.4.17
+  resolution: "dompurify@npm:3.4.17"
+  dependencies:
+    "@types/trusted-types": "npm:^2.0.7"
+  dependenciesMeta:
+    "@types/trusted-types":
+      optional: true
+  checksum: 10c0/6a12251ef5e700fc91b6d96d33e9f8b5fd590c55276f632cf42d182c5808e9f48d5bef435ab26eac235dfcc05ed8fe95e1c8308dcc502bf1050e561f14d0361a
+  languageName: node
+  linkType: hard
+
 "earcut@npm:^3.0.0":
   version: 3.2.4
   resolution: "earcut@npm:3.2.4"
@@ -1420,11 +1439,13 @@ __metadata:
     "@types/react-dom": "npm:^19.2.7"
     "@vitejs/plugin-react": "npm:^6.1.1"
     babel-plugin-react-compiler: "npm:^1.0.0"
+    dompurify: "npm:^3.4.17"
     eslint: "npm:^10.10.0"
     eslint-plugin-react-hooks: "npm:^7.1.1"
     eslint-plugin-react-refresh: "npm:^0.5.6"
     geojson: "npm:^0.5.0"
     globals: "npm:^17.12.0"
+    marked: "npm:^18.1.2"
     ol: "npm:^10.11.0"
     ol-mapbox-style: "npm:^13.5.1"
     prettier: "npm:3.9.10"
@@ -1780,6 +1801,15 @@ __metadata:
   version: 3.2.1
   resolution: "mapbox-to-css-font@npm:3.2.1"
   checksum: 10c0/118fe3126352f5aeb8f6dcdeac5f84fbc383937437e56a6e2310eb1747f19204dd4cfa5f32b9fd91ee370754741f23a65960ee7b99800a7ce38dda6d228e8fc7
+  languageName: node
+  linkType: hard
+
+"marked@npm:^18.1.2":
+  version: 18.1.2
+  resolution: "marked@npm:18.1.2"
+  bin:
+    marked: bin/marked.js
+  checksum: 10c0/0e7312138d6cf866f59a28d2d97ab332ef1b6d1d09263306375a8e9c0e5a4ee892ff1e6ecb668a4959fab0c5f1008c3ddec16c861396fe7cce8f7810521484c9
   languageName: node
   linkType: hard
 
