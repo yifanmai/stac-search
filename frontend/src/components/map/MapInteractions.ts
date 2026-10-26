@@ -4,6 +4,8 @@ import SelectInteraction from "ol/interaction/Select";
 import { extentInteractionStyle, selectStyleFunction } from "./MapStyles";
 import type Layer from "ol/layer/Layer";
 import type STACCollection from "../../types/STACCollection";
+import { toLonLat } from "ol/proj";
+import type BoundingBox from "../../types/BoundingBox";
 
 
 export function createSelectSTACCollectionInteraction(stacCollectionsLayer: Layer, onSelectSTACCollection: (stacCollection: STACCollection) => void): SelectInteraction {
@@ -47,14 +49,20 @@ export function createSelectSTACItemInteraction(stacItemLayer: Layer, onSelectST
           return selectInteraction;
         }
 
-
-
-export const selectSTACItemInteraction = new SelectInteraction({
-  condition: click,
-  style: selectStyleFunction,
-});
-
-export const extentInteraction = new ExtentInteraction({
+export function createExtentInteraction(onExtentChanged: (bbox: BoundingBox | null) => void): ExtentInteraction {
+const extentInteraction = new ExtentInteraction({
   condition: platformModifierKeyOnly,
   boxStyle: extentInteractionStyle,
 });
+
+      extentInteraction.on("extentchanged", (event) => {
+        if (event.extent === null) {
+          onExtentChanged(null);
+        } else {
+          const bbox = toLonLat(event.extent.slice(0, 2)).concat(toLonLat(event.extent.slice(2, 4)));
+          // Manually index into array to satisfy tuple length type checking
+          onExtentChanged([bbox[0], bbox[1], bbox[2], bbox[3]]);
+        }
+      });
+return extentInteraction;
+}

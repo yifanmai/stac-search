@@ -22,7 +22,9 @@ import {
 import {
   performMapAnimations,
 } from "./map/MapAnimations";
-import { createSelectSTACCollectionInteraction, createSelectSTACItemInteraction } from "./map/MapInteractions";
+import { createExtentInteraction, createSelectSTACCollectionInteraction, createSelectSTACItemInteraction } from "./map/MapInteractions";
+import ExtentInteraction from "ol/interaction/Extent";
+
 
 interface Props {
   stacCollections: STACCollection[];
@@ -42,9 +44,10 @@ interface OLMapState {
   stacCollectionsLayer: VectorLayer;
   stacItemsLayer: VectorLayer;
   stacAssetsLayer: WebGLTileLayer;
+  extentInteraction: ExtentInteraction;
 }
 
-function createMap(onSelectSTACCollection: (stacCollection: STACCollection) => void, onSelectSTACItem: (stacItem: STACItem) => void): OLMapState {
+function createMap(onSelectSTACCollection: (stacCollection: STACCollection) => void, onSelectSTACItem: (stacItem: STACItem) => void, onExtentChanged: (bbox: BoundingBox | null) => void): OLMapState {
   const map = new OLMap({
         target: "map",
         view: new View({
@@ -62,21 +65,23 @@ function createMap(onSelectSTACCollection: (stacCollection: STACCollection) => v
 
       const selectSTACCollectionInteraction = createSelectSTACCollectionInteraction(stacCollectionsLayer, onSelectSTACCollection);
       map.addInteraction(selectSTACCollectionInteraction);
-
       const selectSTACItemInteraction = createSelectSTACItemInteraction(stacItemsLayer, onSelectSTACItem);
       map.addInteraction(selectSTACItemInteraction);
+      const extentInteraction = createExtentInteraction(onExtentChanged);
+      map.addInteraction(extentInteraction);
 
       return {
         map: map,
         stacCollectionsLayer: stacCollectionsLayer,
         stacItemsLayer: stacItemsLayer,
         stacAssetsLayer: stacAssetsLayer,
+        extentInteraction: extentInteraction,
       };
 }
 
-function getOrCreateMap(mapStateRef: RefObject<OLMapState | null>, onSelectSTACCollection: (stacCollection: STACCollection) => void, onSelectSTACItem: (stacItem: STACItem) => void): OLMapState {
+function getOrCreateMap(mapStateRef: RefObject<OLMapState | null>, onSelectSTACCollection: (stacCollection: STACCollection) => void, onSelectSTACItem: (stacItem: STACItem) => void, onExtentChanged: (bbox: BoundingBox | null) => void): OLMapState {
   if (mapStateRef.current) return mapStateRef.current;
-  const newMapState = createMap(onSelectSTACCollection, onSelectSTACItem);
+  const newMapState = createMap(onSelectSTACCollection, onSelectSTACItem, onExtentChanged);
   mapStateRef.current = newMapState;
   return newMapState;
 }
@@ -87,6 +92,7 @@ function Map({
   stacAssets,
   selectedSTACCollection,
   mapAnimationRequest,
+  clearExtentRequest,
   onSelectSTACCollection,
   onSelectSTACItem,
   onMapAnimationStarted,
@@ -95,7 +101,7 @@ function Map({
   const mapStateRef = useRef<OLMapState | null>(null);
 
   useEffect(() => {
-    const mapState = getOrCreateMap(mapStateRef, onSelectSTACCollection, onSelectSTACItem);
+    const mapState = getOrCreateMap(mapStateRef, onSelectSTACCollection, onSelectSTACItem, onExtentChanged);
 
     // Update layers
     updateSTACCollectionsLayer(
@@ -118,6 +124,12 @@ function Map({
 
     // Animate map view (if requested)
     performMapAnimations(mapState.map, mapAnimationRequest, stacCollections, selectedSTACCollection, onMapAnimationStarted);
+
+    // Clear extent if requested
+    if (clearExtentRequest) {
+      mapState.extentInteraction.setExtent(null);
+      onExtentChanged(null);
+    }
   });
 
   return <div id="map"></div>;
