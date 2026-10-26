@@ -1,5 +1,5 @@
 import { Map as OLMap, View } from "ol";
-import { useEffect } from "react";
+import { useEffect, type RefObject } from "react";
 import { useRef } from "react";
 import type STACCollection from "../types/STACCollection";
 import VectorLayer from "ol/layer/Vector";
@@ -44,22 +44,8 @@ interface OLMapState {
   stacAssetsLayer: WebGLTileLayer;
 }
 
-function Map({
-  stacCollections,
-  stacItems,
-  stacAssets,
-  selectedSTACCollection,
-  mapAnimationRequest,
-  onSelectSTACCollection,
-  onSelectSTACItem,
-  onMapAnimationStarted,
-  onExtentChanged,
-}: Props) {
-  const mapStateRef = useRef<OLMapState | null>(null);
-
-  useEffect(() => {
-    if (!mapStateRef.current) {
-      const map = new OLMap({
+function createMap(onSelectSTACCollection: (stacCollection: STACCollection) => void, onSelectSTACItem: (stacItem: STACItem) => void): OLMapState {
+  const map = new OLMap({
         target: "map",
         view: new View({
           center: [0, 0],
@@ -80,25 +66,44 @@ function Map({
       const selectSTACItemInteraction = createSelectSTACItemInteraction(stacItemsLayer, onSelectSTACItem);
       map.addInteraction(selectSTACItemInteraction);
 
-      mapStateRef.current = {
+      return {
         map: map,
         stacCollectionsLayer: stacCollectionsLayer,
         stacItemsLayer: stacItemsLayer,
         stacAssetsLayer: stacAssetsLayer,
       };
-    }
+}
 
-    if (!mapStateRef.current) {
-      throw "Could not build map";
-    }
+function getOrCreateMap(mapStateRef: RefObject<OLMapState | null>, onSelectSTACCollection: (stacCollection: STACCollection) => void, onSelectSTACItem: (stacItem: STACItem) => void): OLMapState {
+  if (mapStateRef.current) return mapStateRef.current;
+  const newMapState = createMap(onSelectSTACCollection, onSelectSTACItem);
+  mapStateRef.current = newMapState;
+  return newMapState;
+}
+
+function Map({
+  stacCollections,
+  stacItems,
+  stacAssets,
+  selectedSTACCollection,
+  mapAnimationRequest,
+  onSelectSTACCollection,
+  onSelectSTACItem,
+  onMapAnimationStarted,
+  onExtentChanged,
+}: Props) {
+  const mapStateRef = useRef<OLMapState | null>(null);
+
+  useEffect(() => {
+    const mapState = getOrCreateMap(mapStateRef, onSelectSTACCollection, onSelectSTACItem);
 
     // Update layers
     updateSTACCollectionsLayer(
-      mapStateRef.current.stacCollectionsLayer,
+      mapState.stacCollectionsLayer,
       stacCollections,
     );
-    updateSTACItemsLayer(mapStateRef.current.stacItemsLayer, stacItems);
-    updateSTACAssetsLayer(mapStateRef.current.stacAssetsLayer, stacAssets);
+    updateSTACItemsLayer(mapState.stacItemsLayer, stacItems);
+    updateSTACAssetsLayer(mapState.stacAssetsLayer, stacAssets);
 
     if (selectedSTACCollection !== null) {
       // for (const feature of mapStateRef.current.stacCollectionsLayer
@@ -111,8 +116,8 @@ function Map({
       // }
     }
 
-    // Aniamte map view (if requested)
-    performMapAnimations(mapStateRef.current.map, mapAnimationRequest, stacCollections, selectedSTACCollection, onMapAnimationStarted);
+    // Animate map view (if requested)
+    performMapAnimations(mapState.map, mapAnimationRequest, stacCollections, selectedSTACCollection, onMapAnimationStarted);
   });
 
   return <div id="map"></div>;
