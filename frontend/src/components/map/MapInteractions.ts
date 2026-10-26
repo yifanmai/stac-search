@@ -6,6 +6,7 @@ import type Layer from "ol/layer/Layer";
 import type STACCollection from "../../types/STACCollection";
 import { toLonLat } from "ol/proj";
 import type BoundingBox from "../../types/BoundingBox";
+import type STACItem from "../../types/STACItem";
 
 
 export function createSelectSTACCollectionInteraction(stacCollectionsLayer: Layer, onSelectSTACCollection: (stacCollection: STACCollection) => void): SelectInteraction {
@@ -29,7 +30,7 @@ export function createSelectSTACCollectionInteraction(stacCollectionsLayer: Laye
         }
 
 
-export function createSelectSTACItemInteraction(stacItemLayer: Layer, onSelectSTACItem: (stacCollection: STACItem) => void): SelectInteraction {
+export function createSelectSTACItemInteraction(stacItemLayer: Layer, onSelectSTACItem: (stacItem: STACItem) => void): SelectInteraction {
     const selectInteraction = new SelectInteraction({
         condition: click,
         style: selectStyleFunction,
