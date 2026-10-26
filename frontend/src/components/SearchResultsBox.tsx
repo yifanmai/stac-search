@@ -22,9 +22,7 @@ export default function SearchResultsBox({
           key={stacCollection.url}
           stacCollection={stacCollection}
           onSelectResult={onSelectResult}
-          isSelected={
-            selectedSTACCollection?.url === stacCollection.url
-          }
+          isSelected={selectedSTACCollection?.url === stacCollection.url}
         ></STACCollectionCard>
       ))}
     </div>
