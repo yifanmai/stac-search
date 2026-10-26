@@ -104,11 +104,15 @@ export default function App() {
     setMapAnimationRequest(
       MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION,
     );
+    setSTACItems(null);
+    setSTACAssets(null);
+    setSelectedSTACItem(null);
   };
 
   const onSelectSTACItem = (stacItem: STACItem) => {
     if (stacItem === selectedSTACItem) return;
     setSelectedSTACItem(stacItem);
+    setSTACAssets(null);
   };
 
   const onExtentChanged = (bbox: BoundingBox | null) => {

@@ -22,7 +22,7 @@ import {
 import {
   performMapAnimations,
 } from "./map/MapAnimations";
-import { createSelectSTACCollectionInteraction } from "./map/MapInteractions";
+import { createSelectSTACCollectionInteraction, createSelectSTACItemInteraction } from "./map/MapInteractions";
 
 interface Props {
   stacCollections: STACCollection[];
@@ -76,6 +76,9 @@ function Map({
 
       const selectSTACCollectionInteraction = createSelectSTACCollectionInteraction(stacCollectionsLayer, onSelectSTACCollection);
       map.addInteraction(selectSTACCollectionInteraction);
+
+      const selectSTACItemInteraction = createSelectSTACItemInteraction(stacItemsLayer, onSelectSTACItem);
+      map.addInteraction(selectSTACItemInteraction);
 
       mapStateRef.current = {
         map: map,
