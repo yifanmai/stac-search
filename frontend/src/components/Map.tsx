@@ -10,7 +10,7 @@ import VectorLayer from "ol/layer/Vector";
 import GeoTIFFSource from "ol/source/GeoTIFF";
 import Polygon from "ol/geom/Polygon";
 import { MultiPolygon } from "ol/geom";
-import Select from "ol/interaction/Select";
+import SelectInteraction from "ol/interaction/Select";
 import type BoundingBox from "../types/BoundingBox";
 import type STACItem from "../types/STACItem";
 import type STACAsset from "../types/STACAsset";
@@ -18,17 +18,20 @@ import { isCOGAsset } from "../utilities/COG";
 import { extentInteractionStyle, selectStyleFunction } from "./map/MapStyles";
 import { createBaseLayer, createCOGLayer, createSTACCollectionsLayer, createSTACItemsLayer, updateSTACCollectionsLayer, updateSTACItemsLayer } from "./map/MapLayers";
 import type WebGLTileLayer from "ol/layer/WebGLTile";
+import type MapActionRequest from "../types/MapActionRequest";
+import { animateViewToAllSTACCollections, animateViewToSelectedSTACCollection } from "./map/MapAnimations";
 
 
 interface Props {
   stacCollections: STACCollection[];
-  selectedSTACCollection: STACCollection | null;
   stacItems: STACItem[];
   stacAssets: STACAsset[];
-  clearAreaOfInterest: boolean;
+  selectedSTACCollection: STACCollection | null;
+  mapActionRequest: MapActionRequest | null,
   onSelectResult: (stacCollection: STACCollection) => void;
   onSelectItem: (stacItem: STACItem) => void;
   onExtentChanged: (bbox: BoundingBox | null) => void;
+  onClearMapActionRequest: () => void;
 }
 
 interface OLMapState {
@@ -39,7 +42,7 @@ interface OLMapState {
 }
 
 // select interaction working on "click"
-const selectInteraction = new Select({
+const selectInteraction = new SelectInteraction({
   condition: click,
   style: selectStyleFunction,
 });
@@ -51,63 +54,12 @@ const extentInteraction = new ExtentInteraction({
 });
 
 
-function getPolygonForSTACCollection(stacCollection: STACCollection): Polygon {
-  const coords = [];
-  coords.push(fromLonLat(stacCollection.bbox.coordinates[0][0]));
-  coords.push(fromLonLat(stacCollection.bbox.coordinates[0][2]));
-  return new Polygon([
-    [
-      [coords[0][0], coords[0][1]],
-      [coords[1][0], coords[0][1]],
-      [coords[1][0], coords[1][1]],
-      [coords[0][0], coords[1][1]],
-      [coords[0][0], coords[0][1]],
-    ],
-  ]);
-}
-
-function getMultiPolygonForSTACCollection(
-  stacCollections: STACCollection[],
-): MultiPolygon {
-  const polygons = stacCollections.map(getPolygonForSTACCollection);
-  return new MultiPolygon(polygons);
-}
-
-function viewActiveSTACCollection(
-  map: OLMap,
-  stacCollection: STACCollection,
-): void {
-  const stacCollectionGeoJSON = getPolygonForSTACCollection(stacCollection);
-  map
-    .getView()
-    .fit(stacCollectionGeoJSON, {
-      duration: 1000,
-      maxZoom: 10,
-      padding: [64, 64, 64, 64 + (64 + 320) * 2],
-    });
-}
-
-function viewAllSTACCollections(
-  map: OLMap,
-  stacCollections: STACCollection[],
-): void {
-  const stacCollectionMultiPolygon =
-    getMultiPolygonForSTACCollection(stacCollections);
-  map
-    .getView()
-    .fit(stacCollectionMultiPolygon, {
-      duration: 1000,
-      maxZoom: 10,
-      padding: [64, 64, 64, 64 + 64 + 320],
-    });
-}
-
 function Map({
   stacCollections,
-  selectedSTACCollection,
   stacItems,
-  clearAreaOfInterest,
   stacAssets,
+  selectedSTACCollection,
+  mapActionRequest,
   onSelectResult,
   onSelectItem,
   onExtentChanged,
@@ -180,7 +132,6 @@ function Map({
               return;
             }
           }
-          
         }
       });
 
@@ -207,19 +158,6 @@ function Map({
       throw "Could not build map";
     }
 
-    if (clearAreaOfInterest) {
-      extentInteraction.setExtent(null);
-      // Hack to prevent map after the area of interest is cleared
-      ignoreNextEffect.current = true;
-      return;
-    }
-
-    // Hack to prevent map after the area of interest is cleared
-    if (ignoreNextEffect.current) {
-      ignoreNextEffect.current = false;
-      return;
-    }
-
     updateSTACCollectionsLayer(
       mapStateRef.current.stacCollectionsLayer,
       stacCollections,
@@ -237,9 +175,9 @@ function Map({
           break;
         }
       }
-      viewActiveSTACCollection(mapStateRef.current.map, selectedSTACCollection);
+      animateViewToSelectedSTACCollection(mapStateRef.current.map, selectedSTACCollection);
     } else if (stacCollections.length > 0) {
-      viewAllSTACCollections(mapStateRef.current.map, stacCollections);
+      animateViewToAllSTACCollections(mapStateRef.current.map, stacCollections);
     }
 
     if (stacAssets.length > 0) {
