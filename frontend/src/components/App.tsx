@@ -99,14 +99,15 @@ export default function App() {
   };
 
   const onSelectSTACCollection = (stacCollection: STACCollection) => {
+    if (stacCollection === selectedSTACCollection) return;
+    setSelectedSTACCollection(stacCollection);
     setMapAnimationRequest(
       MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION,
     );
-    setSelectedSTACCollection(stacCollection);
   };
 
-  const onSelectItem = (stacItem: STACItem) => {
-    console.log("selected", stacItem);
+  const onSelectSTACItem = (stacItem: STACItem) => {
+    if (stacItem === selectedSTACItem) return;
     setSelectedSTACItem(stacItem);
   };
 
@@ -127,7 +128,7 @@ export default function App() {
         mapAnimationRequest={mapAnimationRequest}
         clearExtentRequest={clearExtentRequest}
         onSelectSTACCollection={onSelectSTACCollection}
-        onSelectItem={onSelectItem}
+        onSelectSTACItem={onSelectSTACItem}
         onMapAnimationStarted={() => setMapAnimationRequest(null)}
         onExtentChanged={onExtentChanged}
       ></Map>

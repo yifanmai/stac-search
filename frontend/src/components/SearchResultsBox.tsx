@@ -23,8 +23,7 @@ export default function SearchResultsBox({
           stacCollection={stacCollection}
           onSelectResult={onSelectResult}
           isSelected={
-            selectedSTACCollection !== null &&
-            selectedSTACCollection.url === stacCollection.url
+            selectedSTACCollection?.url === stacCollection.url
           }
         ></STACCollectionCard>
       ))}

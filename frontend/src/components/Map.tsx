@@ -35,7 +35,7 @@ interface Props {
   mapAnimationRequest: MapAnimationRequest | null;
   clearExtentRequest: boolean;
   onSelectSTACCollection: (stacCollection: STACCollection) => void;
-  onSelectItem: (stacItem: STACItem) => void;
+  onSelectSTACItem: (stacItem: STACItem) => void;
   onExtentChanged: (bbox: BoundingBox | null) => void;
   onMapAnimationStarted: () => void;
 }
@@ -53,8 +53,8 @@ function Map({
   stacAssets,
   selectedSTACCollection,
   mapAnimationRequest,
-  onSelectSTACCollection: onSelectResult,
-  onSelectItem,
+  onSelectSTACCollection,
+  onSelectSTACItem: onSelectItem,
   onMapAnimationStarted,
   onExtentChanged,
 }: Props) {
@@ -86,36 +86,8 @@ function Map({
       const stacAssetsLayer = createCOGLayer();
       map.addLayer(stacAssetsLayer);
 
-      const selectSTACCollectionInteraction = createSelectSTACCollectionInteraction();
+      const selectSTACCollectionInteraction = createSelectSTACCollectionInteraction(stacCollectionsLayer, onSelectSTACCollection);
       map.addInteraction(selectSTACCollectionInteraction);
-      selectSTACCollectionInteraction.on("select", (event) => {
-        const selectedFeatures = event.target.getFeatures().getArray();
-        if (selectedFeatures.length !== 1) {
-          return;
-        }
-        const selectedFeature = selectedFeatures[0];
-        const selectedFeatureSTACCollection =
-          selectedFeature.getProperties()["stacCollection"];
-        if (
-          selectedSTACCollection === selectedFeatureSTACCollection
-        ) {
-          return;
-        }
-        onSelectResult(selectedFeatureSTACCollection);  
-      });
-
-      map.addInteraction(extentInteraction);
-      extentInteraction.on("extentchanged", (event) => {
-        if (event.extent === null) {
-          onExtentChanged(null);
-        } else {
-          const bbox = toLonLat(event.extent.slice(0, 2)).concat(
-            toLonLat(event.extent.slice(2, 4)),
-          );
-          // Manually index into array to satisfy tuple length type checking
-          onExtentChanged([bbox[0], bbox[1], bbox[2], bbox[3]]);
-        }
-      });
 
       mapStateRef.current = {
         map: map,
