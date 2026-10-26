@@ -6,12 +6,8 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import ExtentInteraction from 'ol/interaction/Extent';
 import type STACCollection from "../types/STACCollection";
-import GeoJSON from "ol/format/GeoJSON.js";
-import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import GeoTIFFSource from "ol/source/GeoTIFF";
-import WebGLTileLayer from 'ol/layer/WebGLTile';
-import Feature from "ol/Feature";
 import Polygon from "ol/geom/Polygon";
 import { MultiPolygon } from "ol/geom";
 import Select from "ol/interaction/Select";
@@ -19,8 +15,10 @@ import type BoundingBox from "../types/BoundingBox";
 import type STACItem from "../types/STACItem";
 import type STACAsset from "../types/STACAsset";
 import { isCOGAsset } from "../utilities/COG";
-import { extentInteractionStyle, resultStyleFunction, selectStyleFunction } from "./map/MapStyles";
-import { baseLayerGroup } from "./map/MayLayers";
+import { extentInteractionStyle, selectStyleFunction } from "./map/MapStyles";
+import { createBaseLayer, createCOGLayer, createSTACCollectionsLayer, createSTACItemsLayer, updateSTACCollectionsLayer, updateSTACItemsLayer } from "./map/MapLayers";
+import type WebGLTileLayer from "ol/layer/WebGLTile";
+
 
 interface Props {
   stacCollections: STACCollection[];
@@ -35,9 +33,8 @@ interface Props {
 
 interface OLMapState {
   map: OLMap;
-  vectorSource: VectorSource;
-  featureCollection: Collection<Feature>;
-  stacItemsSource: VectorSource;
+  stacCollectionsLayer: VectorLayer;
+  stacItemsLayer: VectorLayer;
   cogLayer: WebGLTileLayer,
 }
 
@@ -52,62 +49,6 @@ const extentInteraction = new ExtentInteraction({
   condition: platformModifierKeyOnly,
   boxStyle: extentInteractionStyle,
 });
-
-function getGeoJSONFeatureForSTACCollection(
-  stacCollection: STACCollection,
-): Feature {
-  const feature = new GeoJSON().readFeature(
-    {
-      type: "Feature",
-      geometry: stacCollection.bbox,
-      properties: {
-        type: "collection",
-        title: stacCollection.title,
-        url: stacCollection.url,
-      },
-    },
-    { dataProjection: "EPSG:4326",
-      featureProjection: "EPSG:3857",
-     },
-  );
-  // readFeature() can return Feature or Feature[]
-  // but this function should only return Feature
-  // TODO: Remove this once the upstream return type is changed
-  if (feature instanceof Feature) {
-    return feature;
-  } else {
-    return feature[0];
-  }
-}
-
-function getFeatureForSTACItem(
-  stacItem: STACItem,
-): Feature {
-  const geometry = stacItem.geometry;
-  const feature = new GeoJSON().readFeature(
-    {
-      type: "Feature",
-      geometry: geometry,
-      properties: {
-        type: "item",
-        title: stacItem.title,
-        url: stacItem.url,
-      },
-    },
-    
-    { dataProjection: "EPSG:4326",
-      featureProjection: "EPSG:3857",
-     },
-  );
-  // readFeature() can return Feature or Feature[]
-  // but this function should only return Feature
-  // TODO: Remove this once the upstream return type is changed
-  if (feature instanceof Feature) {
-    return feature;
-  } else {
-    return feature[0];
-  }
-}
 
 
 function getPolygonForSTACCollection(stacCollection: STACCollection): Polygon {
@@ -131,28 +72,6 @@ function getMultiPolygonForSTACCollection(
   const polygons = stacCollections.map(getPolygonForSTACCollection);
   return new MultiPolygon(polygons);
 }
-
-function setFeaturesFromSTACCollections(
-  featureCollection: Collection<Feature>,
-  stacCollections: STACCollection[],
-): void {
-  featureCollection.clear();
-  const collectionFeatures = stacCollections.map(getGeoJSONFeatureForSTACCollection);
-  featureCollection.extend(collectionFeatures);
-}
-
-
-function updateSourceWithSTACItems(
-  source: VectorSource,
-  stacItems: STACItem[],
-): void {
-  const featuresCollection = source.getFeaturesCollection()
-  if (featuresCollection === null) return;
-  featuresCollection.clear();
-  
-  featuresCollection.extend(stacItems.map(getFeatureForSTACItem));
-}
-
 
 function viewActiveSTACCollection(
   map: OLMap,
@@ -206,7 +125,6 @@ function Map({
     stacItemsRef.current = stacItems;
     
     if (!mapStateRef.current) {
-
       const map = new OLMap({
         target: "map",
         view: new View({
@@ -214,31 +132,15 @@ function Map({
           zoom: 1,
         }),
       });
-      map.addLayer(baseLayerGroup());
-      const featureCollection = new Collection<Feature>();
-      const vectorSource = new VectorSource({
-        features: featureCollection,
-      });
-      const vectorLayer = new VectorLayer({
-        source: vectorSource,
-        style: resultStyleFunction,
-        declutter: true,
-      });
-      map.addLayer(vectorLayer);
+      map.addLayer(createBaseLayer());
 
-      const stacItemsFeatureCollection = new Collection<Feature>();
-      const stacItemsSource = new VectorSource({
-        features: stacItemsFeatureCollection,
-      });
-      const stacItemsLayer = new VectorLayer({
-        source: stacItemsSource,
-        // style: stacItemStyleFunction,
-        // declutter: true,
-      });
-      map.addLayer(stacItemsLayer);
+      const stacCollectionsLayer = createSTACCollectionsLayer();
+      map.addLayer(stacCollectionsLayer);
 
+      const stacItemsLayer = createSTACItemsLayer();
+      map.addLayer(stacItemsLayer)
 
-      const cogLayer = new WebGLTileLayer({source: undefined});
+      const cogLayer = createCOGLayer();
       map.addLayer(cogLayer);
 
       map.addInteraction(selectInteraction);
@@ -295,13 +197,15 @@ function Map({
 
       mapStateRef.current = {
         map: map,
-        vectorSource: vectorSource,
-        featureCollection: featureCollection,
-        stacItemsSource: stacItemsSource,
+        stacCollectionsLayer: stacCollectionsLayer,
+        stacItemsLayer: stacItemsLayer,
         cogLayer: cogLayer,
       };
     }
 
+    if (!mapStateRef.current) {
+      throw "Could not build map";
+    }
 
     if (clearAreaOfInterest) {
       extentInteraction.setExtent(null);
@@ -316,18 +220,18 @@ function Map({
       return;
     }
 
-    setFeaturesFromSTACCollections(
-      mapStateRef.current.featureCollection,
+    updateSTACCollectionsLayer(
+      mapStateRef.current.stacCollectionsLayer,
       stacCollections,
     );
 
-    updateSourceWithSTACItems(
-      mapStateRef.current.stacItemsSource,
+    updateSTACItemsLayer(
+      mapStateRef.current.stacItemsLayer,
       stacItems,
     )
 
     if (selectedSTACCollection) {
-      for (const feature of mapStateRef.current.vectorSource.getFeatures()) {
+      for (const feature of mapStateRef.current.stacCollectionsLayer.getSource().getFeatures()) {
         if (feature.getProperties()["url"] == selectedSTACCollection["url"]) {
           selectInteraction.selectFeature(feature);
           break;

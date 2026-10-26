@@ -1,0 +1,139 @@
+import { apply as applyOLMapboxStyle } from "ol-mapbox-style";
+import { resultStyleFunction } from "./MapStyles";
+import Collection from "ol/Collection";
+import Feature from "ol/Feature";
+import GeoJSON from "ol/format/GeoJSON.js";
+import LayerGroup from "ol/layer/Group";
+import type STACCollection from "../../types/STACCollection";
+import type STACItem from "../../types/STACItem";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import WebGLTileLayer from "ol/layer/WebGLTile";
+
+export function createBaseLayer(): LayerGroup{
+          const openFreeMapLayerGroup = new LayerGroup();
+      applyOLMapboxStyle(
+        openFreeMapLayerGroup,
+        "https://tiles.openfreemap.org/styles/positron",
+      );
+      return openFreeMapLayerGroup;
+}
+
+export function createSTACCollectionsLayer(): VectorLayer {
+  const stacCollectionsFeatures = new Collection<Feature>();
+  const vectorSource = new VectorSource({
+    features: stacCollectionsFeatures,
+  });
+  const stacCollectionsLayer = new VectorLayer({
+    source: vectorSource,
+    style: resultStyleFunction,
+    declutter: true,
+  });
+  return stacCollectionsLayer;
+}
+
+export function createSTACItemsLayer(): VectorLayer {
+    const stacItemsFeatures = new Collection<Feature>();
+    const stacItemsSource = new VectorSource({
+      features: stacItemsFeatures,
+    });
+    const stacItemsLayer = new VectorLayer({
+      source: stacItemsSource,
+      // style: stacItemStyleFunction,
+      declutter: true,
+    });
+    return stacItemsLayer;
+}
+
+export function createCOGLayer(): WebGLTileLayer {
+      return new WebGLTileLayer({source: undefined});
+}
+
+export function updateSTACCollectionsLayer(
+  layer: VectorLayer,
+  stacCollections: STACCollection[],
+): void {
+  const source = layer.getSource();
+  if (!source) {
+    throw "STAC Collections layer has no source";
+  }
+  const sourceFeatures = source.getFeaturesCollection();
+  if (sourceFeatures === null) {
+    throw "STAC Collections layer has no source features"
+  }
+  sourceFeatures.clear();
+  sourceFeatures.extend(stacCollections.map(getFeatureForSTACCollection));
+}
+
+
+export function updateSTACItemsLayer(
+  layer: VectorLayer,
+  stacItems: STACItem[],
+): void {
+  const source = layer.getSource();
+  if (!source) {
+    throw "STAC Items layer has no source";
+  }
+  const sourceFeatures = source.getFeaturesCollection()
+  if (sourceFeatures === null) {
+    throw "STAC Items layer has no source features"
+  }
+  sourceFeatures.clear();
+  sourceFeatures.extend(stacItems.map(getFeatureForSTACItem));
+}
+
+function getFeatureForSTACCollection(
+  stacCollection: STACCollection,
+): Feature {
+  const feature = new GeoJSON().readFeature(
+    {
+      type: "Feature",
+      geometry: stacCollection.bbox,
+      properties: {
+        type: "collection",
+        title: stacCollection.title,
+        url: stacCollection.url,
+      },
+    },
+    { dataProjection: "EPSG:4326",
+      featureProjection: "EPSG:3857",
+     },
+  );
+  // readFeature() can return Feature or Feature[]
+  // but this function should only return Feature
+  // TODO: Remove this once the upstream return type is changed
+  if (feature instanceof Feature) {
+    return feature;
+  } else {
+    return feature[0];
+  }
+}
+
+function getFeatureForSTACItem(
+  stacItem: STACItem,
+): Feature {
+  const geometry = stacItem.geometry;
+  const feature = new GeoJSON().readFeature(
+    {
+      type: "Feature",
+      geometry: geometry,
+      properties: {
+        type: "item",
+        title: stacItem.title,
+        url: stacItem.url,
+      },
+    },
+    
+    { dataProjection: "EPSG:4326",
+      featureProjection: "EPSG:3857",
+     },
+  );
+  // readFeature() can return Feature or Feature[]
+  // but this function should only return Feature
+  // TODO: Remove this once the upstream return type is changed
+  if (feature instanceof Feature) {
+    return feature;
+  } else {
+    return feature[0];
+  }
+}
