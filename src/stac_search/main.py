@@ -1,10 +1,10 @@
 import sys
 
 import uvicorn
-
-from pydantic_settings import CliApp
 from pydantic import ValidationError
-from stac_search.config import Settings, set_settings, build_settings_error_message
+from pydantic_settings import CliApp
+
+from stac_search.config import Settings, build_settings_error_message, set_settings
 
 
 def main():

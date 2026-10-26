@@ -1,14 +1,13 @@
-from dataclasses import dataclass
 import json
+from collections.abc import Iterator, Mapping
 from pathlib import Path
-from typing import Iterator, Mapping
 
 
 def maybe_load_json_object_from_file(path: Path) -> Mapping:
     try:
         with path.open("r") as f:
             return json.load(f)
-    except json.decoder.JSONDecodeError as e:
+    except json.decoder.JSONDecodeError:
         return None
 
 

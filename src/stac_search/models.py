@@ -1,4 +1,3 @@
-from typing import Tuple
 
 from geojson_pydantic import Polygon
 from geojson_pydantic.geometries import Geometry
@@ -28,4 +27,4 @@ class STACAsset(BaseModel):
     media_type: str
 
 
-BoundingBox = Tuple[float, float, float, float]
+BoundingBox = tuple[float, float, float, float]

@@ -1,16 +1,12 @@
-from typing import Iterable, Sequence
+from collections.abc import Iterable, Sequence
 
 from geojson_pydantic import (
     GeometryCollection,
-    LineString,
-    MultiLineString,
-    MultiPoint,
     MultiPolygon,
-    Point,
     Polygon,
 )
 from geojson_pydantic.geometries import Geometry
-from geojson_pydantic.types import Position, Position2D
+from geojson_pydantic.types import Position
 
 from stac_search.models import BoundingBox
 

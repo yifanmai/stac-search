@@ -1,21 +1,14 @@
-import os
-from typing import Any, Dict, List, Optional, Tuple
 
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+import psycopg
 from geojson_pydantic import Polygon
 from psycopg.types import TypeInfo
-from pydantic import BaseModel
-import psycopg
 
-from stac_search.psycopg_adapters import register_adapters
-from stac_search.config import get_settings
 from stac_search.models import BoundingBox, STACCollection
 from stac_search.psycopg_adapters import register_adapters
 
 
-def build_sql_query(query_text: str, bbox: Optional[BoundingBox]) -> str:
+def build_sql_query(query_text: str, bbox: BoundingBox | None) -> str:
     columns = ["url", "title", "description", "bbox"]
     tables = ["stac_collections"]
     if query_text:
@@ -39,7 +32,7 @@ def build_sql_query(query_text: str, bbox: Optional[BoundingBox]) -> str:
     return query_template
 
 
-def build_sql_params(query_text: str, bbox: Optional[BoundingBox]) -> Dict:
+def build_sql_params(query_text: str, bbox: BoundingBox | None) -> dict:
     params = {}
     if query_text:
         params["query_text"] = query_text
@@ -59,8 +52,8 @@ def build_sql_params(query_text: str, bbox: Optional[BoundingBox]) -> Dict:
 
 
 def search_stac_collections(
-    conn: psycopg.Connection, query_text: str, bbox: Optional[BoundingBox]
-) -> List[STACCollection]:
+    conn: psycopg.Connection, query_text: str, bbox: BoundingBox | None
+) -> list[STACCollection]:
     query_template = build_sql_query(query_text, bbox)
     query_params = build_sql_params(query_text, bbox)
     print(query_template)

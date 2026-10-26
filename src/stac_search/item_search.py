@@ -1,21 +1,12 @@
-import os
-from typing import Any, Dict, List, Optional, Tuple
 
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from geojson_pydantic import Polygon
-from psycopg.types import TypeInfo
-from pydantic import BaseModel
 import psycopg
+from geojson_pydantic import Polygon
 
-from stac_search.psycopg_adapters import register_adapters
-from stac_search.config import get_settings
 from stac_search.models import BoundingBox, STACAsset, STACCollection, STACItem
-from stac_search.psycopg_adapters import register_adapters
 
 
-def build_sql_query(query_text: str, bbox: Optional[BoundingBox]) -> str:
+def build_sql_query(query_text: str, bbox: BoundingBox | None) -> str:
     columns = ["url", "title", "description", "bbox"]
     tables = ["stac_collections"]
     if query_text:
@@ -39,7 +30,7 @@ def build_sql_query(query_text: str, bbox: Optional[BoundingBox]) -> str:
     return query_template
 
 
-def build_sql_params(query_text: str, bbox: Optional[BoundingBox]) -> Dict:
+def build_sql_params(query_text: str, bbox: BoundingBox | None) -> dict:
     params = {}
     if query_text:
         params["query_text"] = query_text
@@ -60,7 +51,7 @@ def build_sql_params(query_text: str, bbox: Optional[BoundingBox]) -> Dict:
 
 def get_stac_items_in_collection(
     conn: psycopg.Connection, collection_url: str
-) -> List[STACCollection]:
+) -> list[STACCollection]:
     query = "SELECT url, title, description, bbox, geometry FROM stac_items WHERE parent_collection_url = %(parent_collection_url)s LIMIT 100 ;"
     query_params = {"parent_collection_url": collection_url}
     stac_collections = []
@@ -79,7 +70,7 @@ def get_stac_items_in_collection(
     return stac_collections
 
 
-def get_stac_assets_in_item(conn: psycopg.Connection, item_url: str) -> List[STACAsset]:
+def get_stac_assets_in_item(conn: psycopg.Connection, item_url: str) -> list[STACAsset]:
     query = "SELECT url, id, title, description, media_type FROM stac_item_assets WHERE parent_item_url = %(parent_item_url)s LIMIT 100 ;"
     query_params = {"parent_item_url": item_url}
     stac_collections = []

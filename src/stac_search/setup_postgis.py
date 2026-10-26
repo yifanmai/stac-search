@@ -1,23 +1,20 @@
-import os
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 
-from geojson_pydantic.geometries import Geometry
 import psycopg
+from geojson_pydantic.geometries import Geometry
 from psycopg.types import TypeInfo
 from pydantic import TypeAdapter
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from stac_search.geometry import geometry_to_bounding_box, bbox_to_polygon
+from stac_search.geometry import bbox_to_polygon, geometry_to_bounding_box
+from stac_search.psycopg_adapters import register_adapters
 from stac_search.traverse_files import (
     get_collection_paths_recursively,
     get_item_paths,
     get_root_catalog_paths,
     maybe_load_json_object_from_file,
 )
-from stac_search.psycopg_adapters import register_adapters
-from geojson_pydantic import Polygon
-
 
 CATALOGS_DIR_PATH = Path("/home/yifanmai/oss/stac-catalogs-2026-10-22")
 

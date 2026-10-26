@@ -1,8 +1,6 @@
-from typing import Optional
 
 from pydantic import ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 ENV_PREFIX = "STAC_SEARCH_"
 
@@ -19,7 +17,7 @@ class Settings(BaseSettings):
     )
 
 
-SETTINGS: Optional[Settings] = None
+SETTINGS: Settings | None = None
 
 
 def set_settings(settings: Settings) -> None:

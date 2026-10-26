@@ -2,7 +2,6 @@ import os
 
 from fastapi import FastAPI
 
-
 # TODO: Include this in the Python package
 FRONTEND_DIST_PATH = "./frontend/dist"
 FRONTEND_INDEX_FILENAME = "index.html"
