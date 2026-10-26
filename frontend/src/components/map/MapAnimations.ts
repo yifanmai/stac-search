@@ -3,6 +3,7 @@ import MultiPolygon from "ol/geom/MultiPolygon";
 import type STACCollection from "../../types/STACCollection";
 import Polygon from "ol/geom/Polygon";
 import { fromLonLat } from "ol/proj";
+import { MapAnimationRequestValues, type MapAnimationRequest } from "../../types/MapAnimationRequest";
 
 function getPolygonForSTACCollection(stacCollection: STACCollection): Polygon {
   const coords = [];
@@ -49,4 +50,30 @@ export function animateViewToAllSTACCollections(
     maxZoom: 10,
     padding: [64, 64, 64, 64 + 64 + 320],
   });
+}
+
+export function performMapAnimations(map: OLMap, mapAnimationRequest: MapAnimationRequest | null, stacCollections: STACCollection[], selectedSTACCollection: STACCollection | null, onMapAnimationStarted: () => void) {
+  
+    if (mapAnimationRequest) {
+      if (
+        mapAnimationRequest ===
+        MapAnimationRequestValues.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS
+      ) {
+        animateViewToAllSTACCollections(
+          map,
+          stacCollections,
+        );
+      } else if (
+        mapAnimationRequest ===
+        MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION
+      ) {
+        if (selectedSTACCollection) {
+          animateViewToSelectedSTACCollection(
+          map,
+          selectedSTACCollection,
+        );
+        }
+      }
+      onMapAnimationStarted();
+    }
 }

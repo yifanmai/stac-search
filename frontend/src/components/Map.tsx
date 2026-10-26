@@ -1,5 +1,4 @@
 import { Map as OLMap, View } from "ol";
-import { toLonLat } from "ol/proj.js";
 import { useEffect } from "react";
 import { useRef } from "react";
 import type STACCollection from "../types/STACCollection";
@@ -19,13 +18,11 @@ import {
 import type WebGLTileLayer from "ol/layer/WebGLTile";
 import {
   type MapAnimationRequest,
-  MapAnimationRequestValues,
 } from "../types/MapAnimationRequest";
 import {
-  animateViewToAllSTACCollections,
-  animateViewToSelectedSTACCollection,
+  performMapAnimations,
 } from "./map/MapAnimations";
-import { createSelectSTACCollectionInteraction, extentInteraction } from "./map/MapInteractions";
+import { createSelectSTACCollectionInteraction } from "./map/MapInteractions";
 
 interface Props {
   stacCollections: STACCollection[];
@@ -54,19 +51,13 @@ function Map({
   selectedSTACCollection,
   mapAnimationRequest,
   onSelectSTACCollection,
-  onSelectSTACItem: onSelectItem,
+  onSelectSTACItem,
   onMapAnimationStarted,
   onExtentChanged,
 }: Props) {
   const mapStateRef = useRef<OLMapState | null>(null);
-  const stacItemsRef = useRef<STACItem[]>(stacItems);
 
   useEffect(() => {
-    // We need to do this, because otherwise the closure scope captures
-    // a stale stacCollections.
-    // See the comments in the `selectInteraction` handler.
-    stacItemsRef.current = stacItems;
-
     if (!mapStateRef.current) {
       const map = new OLMap({
         target: "map",
@@ -76,13 +67,10 @@ function Map({
         }),
       });
       map.addLayer(createBaseLayer());
-
       const stacCollectionsLayer = createSTACCollectionsLayer();
       map.addLayer(stacCollectionsLayer);
-
       const stacItemsLayer = createSTACItemsLayer();
       map.addLayer(stacItemsLayer);
-
       const stacAssetsLayer = createCOGLayer();
       map.addLayer(stacAssetsLayer);
 
@@ -101,13 +89,12 @@ function Map({
       throw "Could not build map";
     }
 
+    // Update layers
     updateSTACCollectionsLayer(
       mapStateRef.current.stacCollectionsLayer,
       stacCollections,
     );
-
     updateSTACItemsLayer(mapStateRef.current.stacItemsLayer, stacItems);
-
     updateSTACAssetsLayer(mapStateRef.current.stacAssetsLayer, stacAssets);
 
     if (selectedSTACCollection !== null) {
@@ -121,28 +108,8 @@ function Map({
       // }
     }
 
-    if (mapAnimationRequest !== null) {
-      if (
-        mapAnimationRequest ===
-        MapAnimationRequestValues.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS
-      ) {
-        animateViewToAllSTACCollections(
-          mapStateRef.current.map,
-          stacCollections,
-        );
-      } else if (
-        mapAnimationRequest ===
-        MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION
-      ) {
-        if (selectedSTACCollection !== null) {
-          animateViewToSelectedSTACCollection(
-          mapStateRef.current.map,
-          selectedSTACCollection,
-        );
-        }
-      }
-      onMapAnimationStarted();
-    }
+    // Aniamte map view (if requested)
+    performMapAnimations(mapStateRef.current.map, mapAnimationRequest, stacCollections, selectedSTACCollection, onMapAnimationStarted);
   });
 
   return <div id="map"></div>;
