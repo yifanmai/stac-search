@@ -9,6 +9,9 @@ import type STACItem from "../../types/STACItem";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import WebGLTileLayer from "ol/layer/WebGLTile";
+import { isCOGAsset } from "../../utilities/COG";
+import GeoTIFFSource from "ol/source/GeoTIFF";
+import type STACAsset from "../../types/STACAsset";
 
 export function createBaseLayer(): LayerGroup{
           const openFreeMapLayerGroup = new LayerGroup();
@@ -81,6 +84,34 @@ export function updateSTACItemsLayer(
   sourceFeatures.clear();
   sourceFeatures.extend(stacItems.map(getFeatureForSTACItem));
 }
+
+export function updateSTACAssetsLayer(
+  layer: WebGLTileLayer,
+  stacAssets: STACAsset[],
+): void {
+  if (stacAssets.length > 0) {
+    const stacAsset = findDisplayableCOGAsset(stacAssets);
+    const cogSource = new GeoTIFFSource({sources: [
+      {
+        url: stacAsset.url
+      }
+    ]});
+    layer.setSource(cogSource);
+  } else {
+    layer.setSource(null);
+  }
+}
+
+function findDisplayableCOGAsset(stacAssets: STACAsset[]) {
+  for (const stacAsset of stacAssets) {
+    if (isCOGAsset(stacAsset) && stacAsset.id === "visible") {
+      return stacAsset;
+    }
+  }
+  return stacAssets[0];
+}
+
+
 
 function getFeatureForSTACCollection(
   stacCollection: STACCollection,

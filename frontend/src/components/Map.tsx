@@ -1,5 +1,5 @@
-import { Collection, Map as OLMap, View } from "ol";
-import { fromLonLat, toLonLat } from "ol/proj.js";
+import { Map as OLMap, View } from "ol";
+import { toLonLat } from "ol/proj.js";
 
 import { click, platformModifierKeyOnly } from "ol/events/condition";
 import { useEffect } from "react";
@@ -7,18 +7,14 @@ import { useRef } from "react";
 import ExtentInteraction from 'ol/interaction/Extent';
 import type STACCollection from "../types/STACCollection";
 import VectorLayer from "ol/layer/Vector";
-import GeoTIFFSource from "ol/source/GeoTIFF";
-import Polygon from "ol/geom/Polygon";
-import { MultiPolygon } from "ol/geom";
 import SelectInteraction from "ol/interaction/Select";
 import type BoundingBox from "../types/BoundingBox";
 import type STACItem from "../types/STACItem";
 import type STACAsset from "../types/STACAsset";
-import { isCOGAsset } from "../utilities/COG";
 import { extentInteractionStyle, selectStyleFunction } from "./map/MapStyles";
-import { createBaseLayer, createCOGLayer, createSTACCollectionsLayer, createSTACItemsLayer, updateSTACCollectionsLayer, updateSTACItemsLayer } from "./map/MapLayers";
+import { createBaseLayer, createCOGLayer, createSTACCollectionsLayer, createSTACItemsLayer, updateSTACAssetsLayer, updateSTACCollectionsLayer, updateSTACItemsLayer } from "./map/MapLayers";
 import type WebGLTileLayer from "ol/layer/WebGLTile";
-import type MapActionRequest from "../types/MapActionRequest";
+import MapAnimationRequest from "../types/MapAnimationRequest";
 import { animateViewToAllSTACCollections, animateViewToSelectedSTACCollection } from "./map/MapAnimations";
 
 
@@ -27,18 +23,19 @@ interface Props {
   stacItems: STACItem[];
   stacAssets: STACAsset[];
   selectedSTACCollection: STACCollection | null;
-  mapActionRequest: MapActionRequest | null,
+  mapAnimationRequest: MapAnimationRequest | null,
+  clearExtentRequest: boolean,
   onSelectResult: (stacCollection: STACCollection) => void;
   onSelectItem: (stacItem: STACItem) => void;
   onExtentChanged: (bbox: BoundingBox | null) => void;
-  onClearMapActionRequest: () => void;
+  onMapAnimationStarted: () => void;
 }
 
 interface OLMapState {
   map: OLMap;
   stacCollectionsLayer: VectorLayer;
   stacItemsLayer: VectorLayer;
-  cogLayer: WebGLTileLayer,
+  stacAssetsLayer: WebGLTileLayer,
 }
 
 // select interaction working on "click"
@@ -59,17 +56,19 @@ function Map({
   stacItems,
   stacAssets,
   selectedSTACCollection,
-  mapActionRequest,
+  mapAnimationRequest,
   onSelectResult,
   onSelectItem,
+  onMapAnimationStarted,
   onExtentChanged,
 }: Props) {
   const mapStateRef = useRef<OLMapState | null>(null);
   const stacCollectionsRef = useRef<STACCollection[]>(stacCollections);
   const stacItemsRef = useRef<STACItem[]>(stacItems);
-  const ignoreNextEffect = useRef<boolean>(false);
 
   useEffect(() => {
+    console.log(mapAnimationRequest)
+
     // We need to do this, because otherwise the closure scope captures
     // a stale stacCollections.
     // See the comments in the `selectInteraction` handler.
@@ -92,8 +91,8 @@ function Map({
       const stacItemsLayer = createSTACItemsLayer();
       map.addLayer(stacItemsLayer)
 
-      const cogLayer = createCOGLayer();
-      map.addLayer(cogLayer);
+      const stacAssetsLayer = createCOGLayer();
+      map.addLayer(stacAssetsLayer);
 
       map.addInteraction(selectInteraction);
       selectInteraction.on("select", (event) => {
@@ -150,7 +149,7 @@ function Map({
         map: map,
         stacCollectionsLayer: stacCollectionsLayer,
         stacItemsLayer: stacItemsLayer,
-        cogLayer: cogLayer,
+        stacAssetsLayer: stacAssetsLayer,
       };
     }
 
@@ -168,42 +167,28 @@ function Map({
       stacItems,
     )
 
-    if (selectedSTACCollection) {
-      for (const feature of mapStateRef.current.stacCollectionsLayer.getSource().getFeatures()) {
-        if (feature.getProperties()["url"] == selectedSTACCollection["url"]) {
-          selectInteraction.selectFeature(feature);
-          break;
-        }
-      }
-      animateViewToSelectedSTACCollection(mapStateRef.current.map, selectedSTACCollection);
-    } else if (stacCollections.length > 0) {
-      animateViewToAllSTACCollections(mapStateRef.current.map, stacCollections);
-    }
+    updateSTACAssetsLayer(
+      mapStateRef.current.stacAssetsLayer,
+      stacAssets,
+    );
 
-    if (stacAssets.length > 0) {
-      const stacAsset = findDisplayableCOGAsset(stacAssets);
-      const cogSource = new GeoTIFFSource({sources: [
-        {
-          url: stacAsset.url
+    if (mapAnimationRequest !== null) {
+      if (mapAnimationRequest === MapAnimationRequest.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS) {
+        animateViewToAllSTACCollections(mapStateRef.current.map, stacCollections);
+      } else if (mapAnimationRequest === MapAnimationRequest.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION) {
+        for (const feature of mapStateRef.current.stacCollectionsLayer.getSource().getFeatures()) {
+          if (feature.getProperties()["url"] == selectedSTACCollection["url"]) {
+            selectInteraction.selectFeature(feature);
+            break;
+          }
         }
-      ]});
-      mapStateRef.current.cogLayer.setSource(cogSource);
-      mapStateRef.current.cogLayer.setVisible(true);
-    } else {
-      mapStateRef.current.cogLayer.setVisible(false);
+        animateViewToSelectedSTACCollection(mapStateRef.current.map, selectedSTACCollection);  
+      }
+      onMapAnimationStarted();
     }
   });
 
   return <div id="map"></div>;
-}
-
-function findDisplayableCOGAsset(stacAssets: STACAsset[]) {
-  for (const stacAsset of stacAssets) {
-    if (isCOGAsset(stacAsset) && stacAsset.id === "visible") {
-      return stacAsset;
-    }
-  }
-  return stacAssets[0];
 }
 
 export default Map;

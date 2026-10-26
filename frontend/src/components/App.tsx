@@ -12,6 +12,7 @@ import type STACItem from "../types/STACItem.ts";
 import getSTACItems from "../services/getSTACItems.ts";
 import getSTACItemAssets from "../services/getSTACItemAssets.ts";
 import type STACAsset from "../types/STACAsset.ts";
+import MapAnimationRequest from "../types/MapAnimationRequest.ts";
 
 export default function App() {
   // const [count, setCount] = useState(0)
@@ -29,12 +30,14 @@ export default function App() {
   const [stacItems, setSTACItems] = useState<
     STACItem[] | null
   >(null);
+  const [mapAnimationRequest, setMapAnimationRequest] =
+    useState<MapAnimationRequest | null>(null);
 
   // Hacky way to clear the area of interest from Map from the button on SearchQueryBox.
   // SearchQueryBox will sends an event that sets this to true.
   // Map receives this as a prop, and clears the area of interst, and sends an event
   // that sets it back to false.
-  const [clearAreaOfInterest, setClearAreaOfInterest] = useState<boolean>(false);
+  const [clearExtentRequest, setClearExtentRequest] = useState<boolean>(false);
 
   // Search queries
   useEffect(() => {
@@ -45,14 +48,13 @@ export default function App() {
       const response = await doSearch(searchQuery, controller.signal);
       setSelectedSTACCollection(null);
       setSTACCollections(response);
+      setMapAnimationRequest(MapAnimationRequest.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS);
     }
-
     asyncDoSearch();
     return () => controller.abort();
   }, [searchQuery]);
 
-
-  // Item queries
+  // Select collection
   useEffect(() => {
     if (selectedSTACCollection === null) return;
     const controller = new AbortController();
@@ -87,6 +89,7 @@ export default function App() {
   };
 
   const onSelectResult = (stacCollection: STACCollection) => {
+    setMapAnimationRequest(MapAnimationRequest.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION);
     setSelectedSTACCollection(stacCollection);
   };
 
@@ -97,13 +100,9 @@ export default function App() {
 
   const onExtentChanged = (bbox: BoundingBox | null) => {
     if (bbox === null) {
-      setClearAreaOfInterest(false);
+      setClearExtentRequest(false);
     }
     setAreaOfInterest(bbox);
-  };
-
-  const onClearAreaOfInterest = () => {
-    setClearAreaOfInterest(true);
   };
 
   return (
@@ -113,15 +112,17 @@ export default function App() {
         selectedSTACCollection={selectedSTACCollection}
         stacItems={stacItems || []}
         stacAssets={stacAssets || []}
-        clearAreaOfInterest={clearAreaOfInterest}
+        mapAnimationRequest={mapAnimationRequest}
+        clearExtentRequest={clearExtentRequest}
         onSelectResult={onSelectResult}
         onSelectItem={onSelectItem}
+        onMapAnimationStarted={() => setMapAnimationRequest(null)}
         onExtentChanged={onExtentChanged}
       ></Map>
 
       <div className="ui-container">
         <div className="ui-column">
-          <SearchQueryBox areaOfInterest={areaOfInterest} onSearchQuery={onSearchQuery} onClearAreaOfInterest={onClearAreaOfInterest} ></SearchQueryBox>
+          <SearchQueryBox areaOfInterest={areaOfInterest} onSearchQuery={onSearchQuery} onClearAreaOfInterest={() => setClearExtentRequest(true)} ></SearchQueryBox>
           {stacCollections !== null ? (
             <SearchResultsBox
               stacCollections={stacCollections}
