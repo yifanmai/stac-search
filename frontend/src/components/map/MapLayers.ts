@@ -121,6 +121,7 @@ function getFeatureForSTACCollection(stacCollection: STACCollection): Feature {
         type: "collection",
         title: stacCollection.title,
         url: stacCollection.url,
+        stacCollection: stacCollection,
       },
     },
     { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" },
@@ -145,6 +146,7 @@ function getFeatureForSTACItem(stacItem: STACItem): Feature {
         type: "item",
         title: stacItem.title,
         url: stacItem.url,
+        stacItem: stacItem,
       },
     },
 
