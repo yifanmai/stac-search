@@ -10,7 +10,10 @@ export default async function getSTACItemAssets(
   try {
     const params = new URLSearchParams();
     params.append("url", stacItemURL);
-    const searchResults = await fetch(`${apiBaseURL()}${SEARCH_URL}?${params}`, { signal });
+    const searchResults = await fetch(
+      `${apiBaseURL()}${SEARCH_URL}?${params}`,
+      { signal },
+    );
     return searchResults.json();
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {

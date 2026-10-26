@@ -13,13 +13,13 @@ import { isCOGAsset } from "../../utilities/COG";
 import GeoTIFFSource from "ol/source/GeoTIFF";
 import type STACAsset from "../../types/STACAsset";
 
-export function createBaseLayer(): LayerGroup{
-          const openFreeMapLayerGroup = new LayerGroup();
-      applyOLMapboxStyle(
-        openFreeMapLayerGroup,
-        "https://tiles.openfreemap.org/styles/positron",
-      );
-      return openFreeMapLayerGroup;
+export function createBaseLayer(): LayerGroup {
+  const openFreeMapLayerGroup = new LayerGroup();
+  applyOLMapboxStyle(
+    openFreeMapLayerGroup,
+    "https://tiles.openfreemap.org/styles/positron",
+  );
+  return openFreeMapLayerGroup;
 }
 
 export function createSTACCollectionsLayer(): VectorLayer {
@@ -36,20 +36,20 @@ export function createSTACCollectionsLayer(): VectorLayer {
 }
 
 export function createSTACItemsLayer(): VectorLayer {
-    const stacItemsFeatures = new Collection<Feature>();
-    const stacItemsSource = new VectorSource({
-      features: stacItemsFeatures,
-    });
-    const stacItemsLayer = new VectorLayer({
-      source: stacItemsSource,
-      // style: stacItemStyleFunction,
-      declutter: true,
-    });
-    return stacItemsLayer;
+  const stacItemsFeatures = new Collection<Feature>();
+  const stacItemsSource = new VectorSource({
+    features: stacItemsFeatures,
+  });
+  const stacItemsLayer = new VectorLayer({
+    source: stacItemsSource,
+    // style: stacItemStyleFunction,
+    declutter: true,
+  });
+  return stacItemsLayer;
 }
 
 export function createCOGLayer(): WebGLTileLayer {
-      return new WebGLTileLayer({source: undefined});
+  return new WebGLTileLayer({ source: undefined });
 }
 
 export function updateSTACCollectionsLayer(
@@ -62,12 +62,11 @@ export function updateSTACCollectionsLayer(
   }
   const sourceFeatures = source.getFeaturesCollection();
   if (sourceFeatures === null) {
-    throw "STAC Collections layer has no source features"
+    throw "STAC Collections layer has no source features";
   }
   sourceFeatures.clear();
   sourceFeatures.extend(stacCollections.map(getFeatureForSTACCollection));
 }
-
 
 export function updateSTACItemsLayer(
   layer: VectorLayer,
@@ -77,9 +76,9 @@ export function updateSTACItemsLayer(
   if (!source) {
     throw "STAC Items layer has no source";
   }
-  const sourceFeatures = source.getFeaturesCollection()
+  const sourceFeatures = source.getFeaturesCollection();
   if (sourceFeatures === null) {
-    throw "STAC Items layer has no source features"
+    throw "STAC Items layer has no source features";
   }
   sourceFeatures.clear();
   sourceFeatures.extend(stacItems.map(getFeatureForSTACItem));
@@ -91,11 +90,13 @@ export function updateSTACAssetsLayer(
 ): void {
   if (stacAssets.length > 0) {
     const stacAsset = findDisplayableCOGAsset(stacAssets);
-    const cogSource = new GeoTIFFSource({sources: [
-      {
-        url: stacAsset.url
-      }
-    ]});
+    const cogSource = new GeoTIFFSource({
+      sources: [
+        {
+          url: stacAsset.url,
+        },
+      ],
+    });
     layer.setSource(cogSource);
   } else {
     layer.setSource(null);
@@ -111,11 +112,7 @@ function findDisplayableCOGAsset(stacAssets: STACAsset[]) {
   return stacAssets[0];
 }
 
-
-
-function getFeatureForSTACCollection(
-  stacCollection: STACCollection,
-): Feature {
+function getFeatureForSTACCollection(stacCollection: STACCollection): Feature {
   const feature = new GeoJSON().readFeature(
     {
       type: "Feature",
@@ -126,9 +123,7 @@ function getFeatureForSTACCollection(
         url: stacCollection.url,
       },
     },
-    { dataProjection: "EPSG:4326",
-      featureProjection: "EPSG:3857",
-     },
+    { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" },
   );
   // readFeature() can return Feature or Feature[]
   // but this function should only return Feature
@@ -140,9 +135,7 @@ function getFeatureForSTACCollection(
   }
 }
 
-function getFeatureForSTACItem(
-  stacItem: STACItem,
-): Feature {
+function getFeatureForSTACItem(stacItem: STACItem): Feature {
   const geometry = stacItem.geometry;
   const feature = new GeoJSON().readFeature(
     {
@@ -154,10 +147,8 @@ function getFeatureForSTACItem(
         url: stacItem.url,
       },
     },
-    
-    { dataProjection: "EPSG:4326",
-      featureProjection: "EPSG:3857",
-     },
+
+    { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" },
   );
   // readFeature() can return Feature or Feature[]
   // but this function should only return Feature

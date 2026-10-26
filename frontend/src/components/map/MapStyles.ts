@@ -4,7 +4,6 @@ import Style from "ol/style/Style";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
 
-
 // const stacItemStyleFunction = (feature: FeatureLike, _index: number): Style => {
 //   return new Style({
 //     stroke: new Stroke({
@@ -27,8 +26,10 @@ import Stroke from "ol/style/Stroke";
 //   });
 // };
 
-
-export const resultStyleFunction = (feature: FeatureLike, _index: number): Style => {
+export const resultStyleFunction = (
+  feature: FeatureLike,
+  _index: number,
+): Style => {
   return new Style({
     stroke: new Stroke({
       color: "#3399CC",
@@ -50,7 +51,10 @@ export const resultStyleFunction = (feature: FeatureLike, _index: number): Style
   });
 };
 
-export const selectStyleFunction = (feature: FeatureLike, _index: number): Style => {
+export const selectStyleFunction = (
+  feature: FeatureLike,
+  _index: number,
+): Style => {
   return new Style({
     stroke: new Stroke({
       color: "#ff0000",
@@ -72,13 +76,12 @@ export const selectStyleFunction = (feature: FeatureLike, _index: number): Style
   });
 };
 
-
 export const extentInteractionStyle = new Style({
-    stroke: new Stroke({
-        color: [255, 255, 255, 0.8],
-        width: 2.5,
-    }),
-    fill: new Fill({
-        color: [255, 255, 255, 0.1],
-    }),
-})
+  stroke: new Stroke({
+    color: [255, 255, 255, 0.8],
+    width: 2.5,
+  }),
+  fill: new Fill({
+    color: [255, 255, 255, 0.1],
+  }),
+});

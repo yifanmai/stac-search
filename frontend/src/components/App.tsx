@@ -21,15 +21,15 @@ export default function App() {
   >(null);
   const [selectedSTACCollection, setSelectedSTACCollection] =
     useState<STACCollection | null>(null);
-  const [selectedSTACItem, setSelectedSTACItem] =
-    useState<STACItem | null>(null);
-  const [stacAssets, setSTACAssets] =
-    useState<STACAsset[] | null>(null);
+  const [selectedSTACItem, setSelectedSTACItem] = useState<STACItem | null>(
+    null,
+  );
+  const [stacAssets, setSTACAssets] = useState<STACAsset[] | null>(null);
   const [searchQuery, setSearchQuery] = useState<SearchQuery | null>(null);
-  const [areaOfInterest, setAreaOfInterest] = useState<BoundingBox | null>(null);
-  const [stacItems, setSTACItems] = useState<
-    STACItem[] | null
-  >(null);
+  const [areaOfInterest, setAreaOfInterest] = useState<BoundingBox | null>(
+    null,
+  );
+  const [stacItems, setSTACItems] = useState<STACItem[] | null>(null);
   const [mapAnimationRequest, setMapAnimationRequest] =
     useState<MapAnimationRequest | null>(null);
 
@@ -48,7 +48,9 @@ export default function App() {
       const response = await doSearch(searchQuery, controller.signal);
       setSelectedSTACCollection(null);
       setSTACCollections(response);
-      setMapAnimationRequest(MapAnimationRequest.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS);
+      setMapAnimationRequest(
+        MapAnimationRequest.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS,
+      );
     }
     asyncDoSearch();
     return () => controller.abort();
@@ -60,7 +62,10 @@ export default function App() {
     const controller = new AbortController();
     async function asyncGetSTACItems() {
       if (selectedSTACCollection === null) return;
-      const response = await getSTACItems(selectedSTACCollection.url, controller.signal);
+      const response = await getSTACItems(
+        selectedSTACCollection.url,
+        controller.signal,
+      );
       setSTACItems(response);
     }
 
@@ -68,13 +73,16 @@ export default function App() {
     return () => controller.abort();
   }, [selectedSTACCollection]);
 
-    // Item queries
+  // Item queries
   useEffect(() => {
     if (selectedSTACItem === null) return;
     const controller = new AbortController();
     async function asyncGetSTACItems() {
       if (selectedSTACItem === null) return;
-      const response = await getSTACItemAssets(selectedSTACItem.url, controller.signal);
+      const response = await getSTACItemAssets(
+        selectedSTACItem.url,
+        controller.signal,
+      );
       console.log(response);
       setSTACAssets(response);
     }
@@ -83,18 +91,19 @@ export default function App() {
     return () => controller.abort();
   }, [selectedSTACItem]);
 
-
   const onSearchQuery = (searchQuery: SearchQuery) => {
     setSearchQuery(searchQuery);
   };
 
   const onSelectResult = (stacCollection: STACCollection) => {
-    setMapAnimationRequest(MapAnimationRequest.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION);
+    setMapAnimationRequest(
+      MapAnimationRequest.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION,
+    );
     setSelectedSTACCollection(stacCollection);
   };
 
   const onSelectItem = (stacItem: STACItem) => {
-    console.log("selected", stacItem)
+    console.log("selected", stacItem);
     setSelectedSTACItem(stacItem);
   };
 
@@ -122,7 +131,11 @@ export default function App() {
 
       <div className="ui-container">
         <div className="ui-column">
-          <SearchQueryBox areaOfInterest={areaOfInterest} onSearchQuery={onSearchQuery} onClearAreaOfInterest={() => setClearExtentRequest(true)} ></SearchQueryBox>
+          <SearchQueryBox
+            areaOfInterest={areaOfInterest}
+            onSearchQuery={onSearchQuery}
+            onClearAreaOfInterest={() => setClearExtentRequest(true)}
+          ></SearchQueryBox>
           {stacCollections !== null ? (
             <SearchResultsBox
               stacCollections={stacCollections}

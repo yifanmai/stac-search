@@ -14,7 +14,10 @@ export default async function doSearch(
     if (searchQuery.bbox) {
       params.append("bbox", searchQuery.bbox.join(","));
     }
-    const searchResults = await fetch(`${apiBaseURL()}${SEARCH_URL}?${params}`, { signal });
+    const searchResults = await fetch(
+      `${apiBaseURL()}${SEARCH_URL}?${params}`,
+      { signal },
+    );
     return searchResults.json();
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {

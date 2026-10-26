@@ -4,7 +4,7 @@ import { toLonLat } from "ol/proj.js";
 import { click, platformModifierKeyOnly } from "ol/events/condition";
 import { useEffect } from "react";
 import { useRef } from "react";
-import ExtentInteraction from 'ol/interaction/Extent';
+import ExtentInteraction from "ol/interaction/Extent";
 import type STACCollection from "../types/STACCollection";
 import VectorLayer from "ol/layer/Vector";
 import SelectInteraction from "ol/interaction/Select";
@@ -12,19 +12,29 @@ import type BoundingBox from "../types/BoundingBox";
 import type STACItem from "../types/STACItem";
 import type STACAsset from "../types/STACAsset";
 import { extentInteractionStyle, selectStyleFunction } from "./map/MapStyles";
-import { createBaseLayer, createCOGLayer, createSTACCollectionsLayer, createSTACItemsLayer, updateSTACAssetsLayer, updateSTACCollectionsLayer, updateSTACItemsLayer } from "./map/MapLayers";
+import {
+  createBaseLayer,
+  createCOGLayer,
+  createSTACCollectionsLayer,
+  createSTACItemsLayer,
+  updateSTACAssetsLayer,
+  updateSTACCollectionsLayer,
+  updateSTACItemsLayer,
+} from "./map/MapLayers";
 import type WebGLTileLayer from "ol/layer/WebGLTile";
 import MapAnimationRequest from "../types/MapAnimationRequest";
-import { animateViewToAllSTACCollections, animateViewToSelectedSTACCollection } from "./map/MapAnimations";
-
+import {
+  animateViewToAllSTACCollections,
+  animateViewToSelectedSTACCollection,
+} from "./map/MapAnimations";
 
 interface Props {
   stacCollections: STACCollection[];
   stacItems: STACItem[];
   stacAssets: STACAsset[];
   selectedSTACCollection: STACCollection | null;
-  mapAnimationRequest: MapAnimationRequest | null,
-  clearExtentRequest: boolean,
+  mapAnimationRequest: MapAnimationRequest | null;
+  clearExtentRequest: boolean;
   onSelectResult: (stacCollection: STACCollection) => void;
   onSelectItem: (stacItem: STACItem) => void;
   onExtentChanged: (bbox: BoundingBox | null) => void;
@@ -35,7 +45,7 @@ interface OLMapState {
   map: OLMap;
   stacCollectionsLayer: VectorLayer;
   stacItemsLayer: VectorLayer;
-  stacAssetsLayer: WebGLTileLayer,
+  stacAssetsLayer: WebGLTileLayer;
 }
 
 // select interaction working on "click"
@@ -44,12 +54,10 @@ const selectInteraction = new SelectInteraction({
   style: selectStyleFunction,
 });
 
-
 const extentInteraction = new ExtentInteraction({
   condition: platformModifierKeyOnly,
   boxStyle: extentInteractionStyle,
 });
-
 
 function Map({
   stacCollections,
@@ -67,14 +75,14 @@ function Map({
   const stacItemsRef = useRef<STACItem[]>(stacItems);
 
   useEffect(() => {
-    console.log(mapAnimationRequest)
+    console.log(mapAnimationRequest);
 
     // We need to do this, because otherwise the closure scope captures
     // a stale stacCollections.
     // See the comments in the `selectInteraction` handler.
     stacCollectionsRef.current = stacCollections;
     stacItemsRef.current = stacItems;
-    
+
     if (!mapStateRef.current) {
       const map = new OLMap({
         target: "map",
@@ -89,7 +97,7 @@ function Map({
       map.addLayer(stacCollectionsLayer);
 
       const stacItemsLayer = createSTACItemsLayer();
-      map.addLayer(stacItemsLayer)
+      map.addLayer(stacItemsLayer);
 
       const stacAssetsLayer = createCOGLayer();
       map.addLayer(stacAssetsLayer);
@@ -139,7 +147,9 @@ function Map({
         if (event.extent === null) {
           onExtentChanged(null);
         } else {
-          const bbox = toLonLat(event.extent.slice(0, 2)).concat(toLonLat(event.extent.slice(2, 4)));
+          const bbox = toLonLat(event.extent.slice(0, 2)).concat(
+            toLonLat(event.extent.slice(2, 4)),
+          );
           // Manually index into array to satisfy tuple length type checking
           onExtentChanged([bbox[0], bbox[1], bbox[2], bbox[3]]);
         }
@@ -162,27 +172,35 @@ function Map({
       stacCollections,
     );
 
-    updateSTACItemsLayer(
-      mapStateRef.current.stacItemsLayer,
-      stacItems,
-    )
+    updateSTACItemsLayer(mapStateRef.current.stacItemsLayer, stacItems);
 
-    updateSTACAssetsLayer(
-      mapStateRef.current.stacAssetsLayer,
-      stacAssets,
-    );
+    updateSTACAssetsLayer(mapStateRef.current.stacAssetsLayer, stacAssets);
 
     if (mapAnimationRequest !== null) {
-      if (mapAnimationRequest === MapAnimationRequest.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS) {
-        animateViewToAllSTACCollections(mapStateRef.current.map, stacCollections);
-      } else if (mapAnimationRequest === MapAnimationRequest.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION) {
-        for (const feature of mapStateRef.current.stacCollectionsLayer.getSource().getFeatures()) {
+      if (
+        mapAnimationRequest ===
+        MapAnimationRequest.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS
+      ) {
+        animateViewToAllSTACCollections(
+          mapStateRef.current.map,
+          stacCollections,
+        );
+      } else if (
+        mapAnimationRequest ===
+        MapAnimationRequest.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION
+      ) {
+        for (const feature of mapStateRef.current.stacCollectionsLayer
+          .getSource()
+          .getFeatures()) {
           if (feature.getProperties()["url"] == selectedSTACCollection["url"]) {
             selectInteraction.selectFeature(feature);
             break;
           }
         }
-        animateViewToSelectedSTACCollection(mapStateRef.current.map, selectedSTACCollection);  
+        animateViewToSelectedSTACCollection(
+          mapStateRef.current.map,
+          selectedSTACCollection,
+        );
       }
       onMapAnimationStarted();
     }
