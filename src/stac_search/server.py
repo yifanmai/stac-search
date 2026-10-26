@@ -10,6 +10,7 @@ from pydantic import BaseModel
 import psycopg
 
 from stac_search.config import get_settings
+from stac_search.frontend import setup_frontend
 from stac_search.item_search import (
     get_stac_assets_in_item,
     get_stac_items_in_collection,
@@ -27,6 +28,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+setup_frontend(app)
 
 
 def get_connection() -> psycopg.Connection:

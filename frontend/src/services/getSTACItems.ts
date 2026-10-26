@@ -1,6 +1,7 @@
+import apiBaseURL from "../config/apiBaseURL";
 import type STACItem from "../types/STACItem";
 
-const SEARCH_URL = "/stac/collection/items";
+const SEARCH_URL = "stac/collection/items";
 
 export default async function getSTACItems(
   stacCollectionURL: string,
@@ -12,7 +13,7 @@ export default async function getSTACItems(
     // if (searchQuery.bbox) {
     //   params.append("bbox", searchQuery.bbox.join(","));
     // }
-    const searchResults = await fetch(`${SEARCH_URL}?${params}`, { signal });
+    const searchResults = await fetch(`${apiBaseURL}${SEARCH_URL}?${params}`, { signal });
     return searchResults.json();
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {

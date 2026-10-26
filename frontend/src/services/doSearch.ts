@@ -1,7 +1,8 @@
+import apiBaseURL from "../config/apiBaseURL";
 import type SearchQuery from "../types/SearchQuery";
 import type STACCollection from "../types/STACCollection";
 
-const SEARCH_URL = "/stac/collection";
+const SEARCH_URL = "stac/collection";
 
 export default async function doSearch(
   searchQuery: SearchQuery,
@@ -13,7 +14,7 @@ export default async function doSearch(
     if (searchQuery.bbox) {
       params.append("bbox", searchQuery.bbox.join(","));
     }
-    const searchResults = await fetch(`${SEARCH_URL}?${params}`, { signal });
+    const searchResults = await fetch(`${apiBaseURL()}${SEARCH_URL}?${params}`, { signal });
     return searchResults.json();
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
