@@ -12,20 +12,15 @@ import VectorLayer from "ol/layer/Vector";
 import GeoTIFFSource from "ol/source/GeoTIFF";
 import WebGLTileLayer from 'ol/layer/WebGLTile';
 import Feature from "ol/Feature";
-import type { FeatureLike } from "ol/Feature";
 import Polygon from "ol/geom/Polygon";
 import { MultiPolygon } from "ol/geom";
-import Style from "ol/style/Style";
-import Fill from "ol/style/Fill";
-import Stroke from "ol/style/Stroke";
-import Text from "ol/style/Text";
 import Select from "ol/interaction/Select";
-import { apply as applyOLMapboxStyle } from "ol-mapbox-style";
-import LayerGroup from "ol/layer/Group";
 import type BoundingBox from "../types/BoundingBox";
 import type STACItem from "../types/STACItem";
 import type STACAsset from "../types/STACAsset";
 import { isCOGAsset } from "../utilities/COG";
+import { extentInteractionStyle, resultStyleFunction, selectStyleFunction } from "./map/MapStyles";
+import { baseLayerGroup } from "./map/MayLayers";
 
 interface Props {
   stacCollections: STACCollection[];
@@ -46,73 +41,6 @@ interface OLMapState {
   cogLayer: WebGLTileLayer,
 }
 
-// const stacItemStyleFunction = (feature: FeatureLike, _index: number): Style => {
-//   return new Style({
-//     stroke: new Stroke({
-//       color: "#3399CC",
-//       width: 2.5,
-//     }),
-//     text: new Text({
-//       declutterMode: "declutter",
-//       overflow: true,
-//       font: "12px Calibri,sans-serif",
-//       fill: new Fill({
-//         color: "#3399CC",
-//       }),
-//       stroke: new Stroke({
-//         color: "#fff",
-//         width: 3,
-//       }),
-//       text: feature.getProperties()["title"],
-//     }),
-//   });
-// };
-
-
-const resultStyleFunction = (feature: FeatureLike, _index: number): Style => {
-  return new Style({
-    stroke: new Stroke({
-      color: "#3399CC",
-      width: 2.5,
-    }),
-    text: new Text({
-      declutterMode: "declutter",
-      overflow: true,
-      font: "12px Calibri,sans-serif",
-      fill: new Fill({
-        color: "#3399CC",
-      }),
-      stroke: new Stroke({
-        color: "#fff",
-        width: 3,
-      }),
-      text: feature.getProperties()["title"],
-    }),
-  });
-};
-
-const selectStyleFunction = (feature: FeatureLike, _index: number): Style => {
-  return new Style({
-    stroke: new Stroke({
-      color: "#ff0000",
-      width: 2.5,
-    }),
-    text: new Text({
-      declutterMode: "declutter",
-      overflow: true,
-      font: "12px Calibri,sans-serif",
-      fill: new Fill({
-        color: "#ff0000",
-      }),
-      stroke: new Stroke({
-        color: "#fff",
-        width: 3,
-      }),
-      text: feature.getProperties()["title"],
-    }),
-  });
-};
-
 // select interaction working on "click"
 const selectInteraction = new Select({
   condition: click,
@@ -122,15 +50,7 @@ const selectInteraction = new Select({
 
 const extentInteraction = new ExtentInteraction({
   condition: platformModifierKeyOnly,
-  boxStyle: new Style({
-    stroke: new Stroke({
-      color: [255, 255, 255, 0.8],
-      width: 2.5,
-    }),
-    fill: new Fill({
-      color: [255, 255, 255, 0.1],
-    }),
-  })
+  boxStyle: extentInteractionStyle,
 });
 
 function getGeoJSONFeatureForSTACCollection(
@@ -152,6 +72,7 @@ function getGeoJSONFeatureForSTACCollection(
   );
   // readFeature() can return Feature or Feature[]
   // but this function should only return Feature
+  // TODO: Remove this once the upstream return type is changed
   if (feature instanceof Feature) {
     return feature;
   } else {
@@ -180,6 +101,7 @@ function getFeatureForSTACItem(
   );
   // readFeature() can return Feature or Feature[]
   // but this function should only return Feature
+  // TODO: Remove this once the upstream return type is changed
   if (feature instanceof Feature) {
     return feature;
   } else {
@@ -271,7 +193,6 @@ function Map({
   onSelectItem,
   onExtentChanged,
 }: Props) {
-  const mapRef = useRef<OLMap | null>(null);
   const mapStateRef = useRef<OLMapState | null>(null);
   const stacCollectionsRef = useRef<STACCollection[]>(stacCollections);
   const stacItemsRef = useRef<STACItem[]>(stacItems);
@@ -285,21 +206,15 @@ function Map({
     stacItemsRef.current = stacItems;
     
     if (!mapStateRef.current) {
-      const openFreeMapLayerGroup = new LayerGroup();
-      applyOLMapboxStyle(
-        openFreeMapLayerGroup,
-        "https://tiles.openfreemap.org/styles/positron",
-      );
 
       const map = new OLMap({
         target: "map",
-        layers: [openFreeMapLayerGroup],
         view: new View({
           center: [0, 0],
           zoom: 1,
         }),
       });
-      mapRef.current = map;
+      map.addLayer(baseLayerGroup());
       const featureCollection = new Collection<Feature>();
       const vectorSource = new VectorSource({
         features: featureCollection,
@@ -322,14 +237,6 @@ function Map({
       });
       map.addLayer(stacItemsLayer);
 
-
-    // const cogSource = new GeoTIFFSource({
-    //   sources: [
-    //     {
-    //       url: 'https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/36/Q/WD/2020/7/S2A_36QWD_20200701_0_L2A/TCI.tif',
-    //     },
-    //   ],
-    // });
 
       const cogLayer = new WebGLTileLayer({source: undefined});
       map.addLayer(cogLayer);
