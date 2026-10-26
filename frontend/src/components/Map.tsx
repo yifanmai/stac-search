@@ -1,17 +1,12 @@
 import { Map as OLMap, View } from "ol";
 import { toLonLat } from "ol/proj.js";
-
-import { click, platformModifierKeyOnly } from "ol/events/condition";
 import { useEffect } from "react";
 import { useRef } from "react";
-import ExtentInteraction from "ol/interaction/Extent";
 import type STACCollection from "../types/STACCollection";
 import VectorLayer from "ol/layer/Vector";
-import SelectInteraction from "ol/interaction/Select";
 import type BoundingBox from "../types/BoundingBox";
 import type STACItem from "../types/STACItem";
 import type STACAsset from "../types/STACAsset";
-import { extentInteractionStyle, selectStyleFunction } from "./map/MapStyles";
 import {
   createBaseLayer,
   createCOGLayer,
@@ -22,11 +17,15 @@ import {
   updateSTACItemsLayer,
 } from "./map/MapLayers";
 import type WebGLTileLayer from "ol/layer/WebGLTile";
-import MapAnimationRequest from "../types/MapAnimationRequest";
+import {
+  type MapAnimationRequest,
+  MapAnimationRequestValues,
+} from "../types/MapAnimationRequest";
 import {
   animateViewToAllSTACCollections,
   animateViewToSelectedSTACCollection,
 } from "./map/MapAnimations";
+import { extentInteraction, selectInteraction } from "./map/MapInteractions";
 
 interface Props {
   stacCollections: STACCollection[];
@@ -47,17 +46,6 @@ interface OLMapState {
   stacItemsLayer: VectorLayer;
   stacAssetsLayer: WebGLTileLayer;
 }
-
-// select interaction working on "click"
-const selectInteraction = new SelectInteraction({
-  condition: click,
-  style: selectStyleFunction,
-});
-
-const extentInteraction = new ExtentInteraction({
-  condition: platformModifierKeyOnly,
-  boxStyle: extentInteractionStyle,
-});
 
 function Map({
   stacCollections,
@@ -174,10 +162,21 @@ function Map({
 
     updateSTACAssetsLayer(mapStateRef.current.stacAssetsLayer, stacAssets);
 
+    if (selectedSTACCollection !== null) {
+      // for (const feature of mapStateRef.current.stacCollectionsLayer
+      //   .getSource()
+      //   .getFeatures()) {
+      //   if (feature.getProperties()["url"] == selectedSTACCollection["url"]) {
+      //     selectInteraction.selectFeature(feature);
+      //     break;
+      //   }
+      // }
+    }
+
     if (mapAnimationRequest !== null) {
       if (
         mapAnimationRequest ===
-        MapAnimationRequest.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS
+        MapAnimationRequestValues.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS
       ) {
         animateViewToAllSTACCollections(
           mapStateRef.current.map,
@@ -185,20 +184,14 @@ function Map({
         );
       } else if (
         mapAnimationRequest ===
-        MapAnimationRequest.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION
+        MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION
       ) {
-        for (const feature of mapStateRef.current.stacCollectionsLayer
-          .getSource()
-          .getFeatures()) {
-          if (feature.getProperties()["url"] == selectedSTACCollection["url"]) {
-            selectInteraction.selectFeature(feature);
-            break;
-          }
-        }
-        animateViewToSelectedSTACCollection(
+        if (selectedSTACCollection !== null) {
+          animateViewToSelectedSTACCollection(
           mapStateRef.current.map,
           selectedSTACCollection,
         );
+        }
       }
       onMapAnimationStarted();
     }

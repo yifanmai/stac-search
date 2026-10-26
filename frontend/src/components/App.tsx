@@ -12,7 +12,10 @@ import type STACItem from "../types/STACItem.ts";
 import getSTACItems from "../services/getSTACItems.ts";
 import getSTACItemAssets from "../services/getSTACItemAssets.ts";
 import type STACAsset from "../types/STACAsset.ts";
-import MapAnimationRequest from "../types/MapAnimationRequest.ts";
+import {
+  type MapAnimationRequest,
+  MapAnimationRequestValues,
+} from "../types/MapAnimationRequest.ts";
 
 export default function App() {
   // const [count, setCount] = useState(0)
@@ -49,7 +52,7 @@ export default function App() {
       setSelectedSTACCollection(null);
       setSTACCollections(response);
       setMapAnimationRequest(
-        MapAnimationRequest.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS,
+        MapAnimationRequestValues.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS,
       );
     }
     asyncDoSearch();
@@ -97,7 +100,7 @@ export default function App() {
 
   const onSelectResult = (stacCollection: STACCollection) => {
     setMapAnimationRequest(
-      MapAnimationRequest.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION,
+      MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION,
     );
     setSelectedSTACCollection(stacCollection);
   };

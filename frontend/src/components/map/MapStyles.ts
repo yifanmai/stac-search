@@ -28,7 +28,7 @@ import Stroke from "ol/style/Stroke";
 
 export const resultStyleFunction = (
   feature: FeatureLike,
-  _index: number,  // eslint-disable-line @typescript-eslint/no-unused-vars
+  _index: number, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Style => {
   return new Style({
     stroke: new Stroke({
@@ -53,7 +53,7 @@ export const resultStyleFunction = (
 
 export const selectStyleFunction = (
   feature: FeatureLike,
-  _index: number,  // eslint-disable-line @typescript-eslint/no-unused-vars
+  _index: number, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Style => {
   return new Style({
     stroke: new Stroke({
