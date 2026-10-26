@@ -4,8 +4,14 @@ import SelectInteraction from "ol/interaction/Select";
 import { extentInteractionStyle, selectStyleFunction } from "./MapStyles";
 
 
-// select interaction working on "click"
-export const selectInteraction = new SelectInteraction({
+export function createSelectSTACCollectionInteraction(): SelectInteraction {
+    return new SelectInteraction({
+        condition: click,
+        style: selectStyleFunction,
+        });
+    }
+
+export const selectSTACItemInteraction = new SelectInteraction({
   condition: click,
   style: selectStyleFunction,
 });

@@ -25,7 +25,7 @@ import {
   animateViewToAllSTACCollections,
   animateViewToSelectedSTACCollection,
 } from "./map/MapAnimations";
-import { extentInteraction, selectInteraction } from "./map/MapInteractions";
+import { createSelectSTACCollectionInteraction, extentInteraction } from "./map/MapInteractions";
 
 interface Props {
   stacCollections: STACCollection[];
@@ -86,27 +86,22 @@ function Map({
       const stacAssetsLayer = createCOGLayer();
       map.addLayer(stacAssetsLayer);
 
-      map.addInteraction(selectInteraction);
-      selectInteraction.on("select", (event) => {
+      const selectSTACCollectionInteraction = createSelectSTACCollectionInteraction();
+      map.addInteraction(selectSTACCollectionInteraction);
+      selectSTACCollectionInteraction.on("select", (event) => {
         const selectedFeatures = event.target.getFeatures().getArray();
         if (selectedFeatures.length !== 1) {
           return;
         }
         const selectedFeature = selectedFeatures[0];
-        const selectedFeatureType = selectedFeature.getProperties()["type"];
-        if (selectedFeatureType === "collection") {
-          const selectedFeatureSTACCollection =
-            selectedFeature.getProperties()["stacCollection"];
-          if (
-            selectedSTACCollection === selectedFeatureSTACCollection
-          ) {
-            return;
-          }
-          onSelectResult(selectedFeatureSTACCollection);
-        } else if (selectedFeatureType === "item") {
-          const selectedFeatureSTACItem = selectedFeature.getProperties()["stacItem"];
-          onSelectItem(selectedFeatureSTACItem);
+        const selectedFeatureSTACCollection =
+          selectedFeature.getProperties()["stacCollection"];
+        if (
+          selectedSTACCollection === selectedFeatureSTACCollection
+        ) {
+          return;
         }
+        onSelectResult(selectedFeatureSTACCollection);
       });
 
       map.addInteraction(extentInteraction);
