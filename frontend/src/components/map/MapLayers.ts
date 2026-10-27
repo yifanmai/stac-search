@@ -105,6 +105,7 @@ export function updateSTACAssetsLayer(
           url: stacAsset.url,
         },
       ],
+      loadMissingProjection: true,
     });
     layer.setSource(cogSource);
   } else {
