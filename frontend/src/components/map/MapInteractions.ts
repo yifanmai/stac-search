@@ -1,7 +1,7 @@
 import { click, platformModifierKeyOnly } from "ol/events/condition";
 import ExtentInteraction from "ol/interaction/Extent";
 import SelectInteraction from "ol/interaction/Select";
-import { extentInteractionStyle, selectStyleFunction } from "./MapStyles";
+import { extentInteractionStyle, selectedSTACCollectionStyleFunction } from "./MapStyles";
 import type Layer from "ol/layer/Layer";
 import type STACCollection from "../../types/STACCollection";
 import { toLonLat } from "ol/proj";
@@ -14,7 +14,7 @@ export function createSelectSTACCollectionInteraction(
 ): SelectInteraction {
   const selectInteraction = new SelectInteraction({
     condition: click,
-    style: selectStyleFunction,
+    style: selectedSTACCollectionStyleFunction,
     layers: [stacCollectionsLayer],
   });
 
@@ -37,7 +37,7 @@ export function createSelectSTACItemInteraction(
 ): SelectInteraction {
   const selectInteraction = new SelectInteraction({
     condition: click,
-    style: selectStyleFunction,
+    style: selectedSTACCollectionStyleFunction,
     layers: [stacItemLayer],
   });
 

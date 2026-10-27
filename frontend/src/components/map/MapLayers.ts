@@ -1,5 +1,5 @@
 import { apply as applyOLMapboxStyle } from "ol-mapbox-style";
-import { resultStyleFunction } from "./MapStyles";
+import { stacCollectionStyleFunction } from "./MapStyles";
 import Collection from "ol/Collection";
 import Feature from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON.js";
@@ -30,7 +30,7 @@ export function createSTACCollectionsLayer(): VectorLayer {
   });
   const stacCollectionsLayer = new VectorLayer({
     source: vectorSource,
-    style: resultStyleFunction,
+    style: stacCollectionStyleFunction,
     declutter: true,
   });
   return stacCollectionsLayer;
@@ -52,12 +52,6 @@ export function createSTACItemsLayer(): VectorLayer {
 export function createSTACAssetsLayer(): WebGLTileLayer {
   return new WebGLTileLayer({ source: undefined });
 }
-
-function areArraysEqual<Type>(array1: Type[], array2: Type[]): boolean {
-  if (array1.length !== array2.length) return false;
-  return array1.every((v, index) => v === array2[index]);
-}
-
 
 export function updateSTACCollectionsLayer(
   layer: VectorLayer,
@@ -90,6 +84,10 @@ export function updateSTACItemsLayer(
   const sourceFeatures = source.getFeaturesCollection();
   if (sourceFeatures === null) {
     throw "STAC Items layer has no source features";
+  }
+  const stacItemsFromFeatures = sourceFeatures.getArray().map((feature:Feature )=> feature.getProperties()["stacItem"])
+  if (areArraysEqual(stacItems, stacItemsFromFeatures)) {
+    return;
   }
   sourceFeatures.clear();
   sourceFeatures.extend(stacItems.map(getFeatureForSTACItem));
@@ -162,4 +160,9 @@ function getFeatureForSTACItem(stacItem: STACItem): Feature {
   // TODO: Remove this once the upstream return type is changed
   clampFeatureGeometryToValidRange(feature);
   return feature
+}
+
+function areArraysEqual<Type>(array1: Type[], array2: Type[]): boolean {
+  if (array1.length !== array2.length) return false;
+  return array1.every((v, index) => v === array2[index]);
 }

@@ -4,29 +4,7 @@ import Style from "ol/style/Style";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
 
-// const stacItemStyleFunction = (feature: FeatureLike, _index: number): Style => {
-//   return new Style({
-//     stroke: new Stroke({
-//       color: "#3399CC",
-//       width: 2.5,
-//     }),
-//     text: new Text({
-//       declutterMode: "declutter",
-//       overflow: true,
-//       font: "12px Calibri,sans-serif",
-//       fill: new Fill({
-//         color: "#3399CC",
-//       }),
-//       stroke: new Stroke({
-//         color: "#fff",
-//         width: 3,
-//       }),
-//       text: feature.getProperties()["title"],
-//     }),
-//   });
-// };
-
-export const resultStyleFunction = (
+export const stacCollectionStyleFunction = (
   feature: FeatureLike,
   _index: number, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Style => {
@@ -51,7 +29,7 @@ export const resultStyleFunction = (
   });
 };
 
-export const selectStyleFunction = (
+export const selectedSTACCollectionStyleFunction = (
   feature: FeatureLike,
   _index: number, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Style => {
