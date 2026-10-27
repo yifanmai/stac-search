@@ -15,7 +15,6 @@ function clampCoordinatesToValidRange(
     input: number[],
     output?: number[],
     dimension?: number,
-    stride?: number // eslint-disable-line @typescript-eslint/no-unused-vars
 ): number[] {
     const numDims = dimension ? dimension : 2;
     
