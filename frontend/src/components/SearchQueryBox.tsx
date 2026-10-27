@@ -40,7 +40,9 @@ export default function SearchQueryBox({
       <h1>STAC Search</h1>
       <input
         type="text"
+        placeholder="Query e.g. forests, soil"
         onChange={(e) => setQueryText(e.target.value)}
+        width={300}
         className="text-input"
       ></input>
       <input
