@@ -13,6 +13,7 @@ export default function STACCollectionInfoBox({ stacCollection }: Props) {
   return (
     <div className="ui-column">
       <h2>{stacCollection.title}</h2>
+      <p><a href={stacCollection.url}>Source STAC Object</a></p>
       <div dangerouslySetInnerHTML={{ __html: formattedDescription }}></div>
     </div>
   );
