@@ -48,7 +48,7 @@ export function createSTACItemsLayer(): VectorLayer {
   return stacItemsLayer;
 }
 
-export function createCOGLayer(): WebGLTileLayer {
+export function createSTACAssetsLayer(): WebGLTileLayer {
   return new WebGLTileLayer({ source: undefined });
 }
 

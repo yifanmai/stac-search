@@ -8,7 +8,7 @@ import type STACItem from "../types/STACItem";
 import type STACAsset from "../types/STACAsset";
 import {
   createBaseLayer,
-  createCOGLayer,
+  createSTACAssetsLayer,
   createSTACCollectionsLayer,
   createSTACItemsLayer,
   updateSTACAssetsLayer,
@@ -63,7 +63,7 @@ function createMap(
   map.addLayer(stacCollectionsLayer);
   const stacItemsLayer = createSTACItemsLayer();
   map.addLayer(stacItemsLayer);
-  const stacAssetsLayer = createCOGLayer();
+  const stacAssetsLayer = createSTACAssetsLayer();
   map.addLayer(stacAssetsLayer);
 
   const selectSTACCollectionInteraction = createSelectSTACCollectionInteraction(
@@ -131,23 +131,12 @@ function Map({
     updateSTACItemsLayer(mapState.stacItemsLayer, stacItems);
     updateSTACAssetsLayer(mapState.stacAssetsLayer, stacAssets);
 
-    if (selectedSTACCollection !== null) {
-      // for (const feature of mapStateRef.current.stacCollectionsLayer
-      //   .getSource()
-      //   .getFeatures()) {
-      //   if (feature.getProperties()["url"] == selectedSTACCollection["url"]) {
-      //     selectInteraction.selectFeature(feature);
-      //     break;
-      //   }
-      // }
-    }
-
     // Animate map view (if requested)
     performMapAnimations(
       mapState.map,
       mapAnimationRequest,
-      stacCollections,
       selectedSTACCollection,
+      mapState.stacCollectionsLayer,
       onMapAnimationStarted,
     );
 

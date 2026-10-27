@@ -1,65 +1,63 @@
-import { Map as OLMap } from "ol";
+import { Feature, Map as OLMap } from "ol";
 import MultiPolygon from "ol/geom/MultiPolygon";
 import type STACCollection from "../../types/STACCollection";
 import Polygon from "ol/geom/Polygon";
-import { fromLonLat } from "ol/proj";
 import {
   MapAnimationRequestValues,
   type MapAnimationRequest,
 } from "../../types/MapAnimationRequest";
+import type VectorLayer from "ol/layer/Vector";
 
-function getPolygonForSTACCollection(stacCollection: STACCollection): Polygon {
-  const coords = [];
-  coords.push(fromLonLat(stacCollection.bbox.coordinates[0][0]));
-  coords.push(fromLonLat(stacCollection.bbox.coordinates[0][2]));
-  return new Polygon([
-    [
-      [coords[0][0], coords[0][1]],
-      [coords[1][0], coords[0][1]],
-      [coords[1][0], coords[1][1]],
-      [coords[0][0], coords[1][1]],
-      [coords[0][0], coords[0][1]],
-    ],
-  ]);
-}
-
-function getMultiPolygonForSTACCollection(
-  stacCollections: STACCollection[],
-): MultiPolygon {
-  const polygons = stacCollections.map(getPolygonForSTACCollection);
-  return new MultiPolygon(polygons);
-}
-
-export function animateViewToSelectedSTACCollection(
+function animateViewToSelectedSTACCollection(
   map: OLMap,
-  stacCollection: STACCollection,
+  selectedSTACCollection: STACCollection,
+  stacCollectionsLayer: VectorLayer,
 ): void {
-  const stacCollectionGeoJSON = getPolygonForSTACCollection(stacCollection);
-  map.getView().fit(stacCollectionGeoJSON, {
-    duration: 1000,
-    maxZoom: 10,
-    padding: [64, 64, 64, 64 + (64 + 320) * 2],
-  });
+  const features: Feature[] =
+    stacCollectionsLayer.getSource()?.getFeatures() || [];
+  for (const feature of features) {
+    if (feature.getProperties()["stacCollection"] === selectedSTACCollection) {
+      const geometry = feature.getGeometry();
+      if (geometry && geometry.getType() === "Polygon") {
+        map.getView().fit(geometry as Polygon, {
+          duration: 1000,
+          maxZoom: 10,
+          padding: [64, 64, 64, 64 + (64 + 320) * 2],
+        });
+        return;
+      }
+    }
+  }
 }
 
-export function animateViewToAllSTACCollections(
+function animateViewToAllSTACCollections(
   map: OLMap,
-  stacCollections: STACCollection[],
+  stacCollectionsLayer: VectorLayer,
 ): void {
-  const stacCollectionMultiPolygon =
-    getMultiPolygonForSTACCollection(stacCollections);
-  map.getView().fit(stacCollectionMultiPolygon, {
+  map.getView().fit(getVectorLayerGeometry(stacCollectionsLayer), {
     duration: 1000,
     maxZoom: 10,
     padding: [64, 64, 64, 64 + 64 + 320],
   });
 }
 
+function getVectorLayerGeometry(vectorLayer: VectorLayer): MultiPolygon {
+  const features: Feature[] = vectorLayer.getSource()?.getFeatures() || [];
+  const polygons: Polygon[] = [];
+  for (const feature of features) {
+    const geometry = feature.getGeometry() as Polygon;
+    if (geometry && geometry.getType() === "Polygon") {
+      polygons.push(geometry);
+    }
+  }
+  return new MultiPolygon(polygons);
+}
+
 export function performMapAnimations(
   map: OLMap,
   mapAnimationRequest: MapAnimationRequest | null,
-  stacCollections: STACCollection[],
   selectedSTACCollection: STACCollection | null,
+  stacCollectionsLayer: VectorLayer,
   onMapAnimationStarted: () => void,
 ) {
   if (mapAnimationRequest) {
@@ -67,13 +65,17 @@ export function performMapAnimations(
       mapAnimationRequest ===
       MapAnimationRequestValues.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS
     ) {
-      animateViewToAllSTACCollections(map, stacCollections);
+      animateViewToAllSTACCollections(map, stacCollectionsLayer);
     } else if (
       mapAnimationRequest ===
       MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION
     ) {
       if (selectedSTACCollection) {
-        animateViewToSelectedSTACCollection(map, selectedSTACCollection);
+        animateViewToSelectedSTACCollection(
+          map,
+          selectedSTACCollection,
+          stacCollectionsLayer,
+        );
       }
     }
     onMapAnimationStarted();
