@@ -13,6 +13,12 @@ import { isCOGAsset } from "../../utilities/COG";
 import GeoTIFFSource from "ol/source/GeoTIFF";
 import type STACAsset from "../../types/STACAsset";
 import { clampFeatureGeometryToValidRange } from "../../utilities/geometry";
+import proj4 from 'proj4';
+import {register} from 'ol/proj/proj4.js';
+
+// Support raster reprojection
+// See: https://openlayers.org/doc/tutorials/raster-reprojection.html
+register(proj4)
 
 export function createBaseLayer(): LayerGroup {
   const openFreeMapLayerGroup = new LayerGroup();

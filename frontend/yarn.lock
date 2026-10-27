@@ -1449,6 +1449,7 @@ __metadata:
     ol: "npm:^10.11.0"
     ol-mapbox-style: "npm:^13.5.1"
     prettier: "npm:3.9.10"
+    proj4: "npm:^2.22.0"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
     rolldown: "npm:^1.2.13"
@@ -1813,6 +1814,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mgrs@npm:1.0.0":
+  version: 1.0.0
+  resolution: "mgrs@npm:1.0.0"
+  checksum: 10c0/a360853be5a3b4f4734dbf0a193851c08039ccb6077362ab0f890cccd170ef88b59585129757da9fea4d7a313d7dc3ee88f37f594fc1ae3e4e8efc5353144d77
+  languageName: node
+  linkType: hard
+
 "minimatch@npm:^10.2.2, minimatch@npm:^10.2.4, minimatch@npm:^10.2.5":
   version: 10.2.6
   resolution: "minimatch@npm:10.2.6"
@@ -2057,6 +2065,21 @@ __metadata:
   version: 7.0.0
   resolution: "proc-log@npm:7.0.0"
   checksum: 10c0/b89c2d862604f35fec795477b0c7e376feab3ba0d4f4d291c4e959567442697cf451ac557d0623c1cc38af45a78128b983410f397a10c5d3a67f76c33de4754b
+  languageName: node
+  linkType: hard
+
+"proj4@npm:^2.22.0":
+  version: 2.22.0
+  resolution: "proj4@npm:2.22.0"
+  dependencies:
+    mgrs: "npm:1.0.0"
+    wkt-parser: "npm:^1.5.5"
+  peerDependencies:
+    geotiff: "*"
+  peerDependenciesMeta:
+    geotiff:
+      optional: true
+  checksum: 10c0/11452d48cda44ff6011e7af9879b4881d7010c7be763785c319819362bb13ffed986174f72cf540c8e3854691f573fcb7fe95d8a5cec3dddd2091f6f92e307a9
   languageName: node
   linkType: hard
 
@@ -2514,6 +2537,13 @@ __metadata:
   bin:
     node-which: bin/which.js
   checksum: 10c0/ca0b54f198f78bbc4b7c02e34bda8d335cb352e0adb4cbca1c37b1a957af3a879a82c4c27ca6525bc942f548d8b64f816ef6528360af9f3de55ffb9b979b620d
+  languageName: node
+  linkType: hard
+
+"wkt-parser@npm:^1.5.5":
+  version: 1.6.0
+  resolution: "wkt-parser@npm:1.6.0"
+  checksum: 10c0/eaea9cd2c0146e92f568781c7d2209d1eea3aac911d499c7bed38e1a5e50b31e6ac25e59f00886a8bf43c15a140f51c23b4a9eb19892e2cffb1ac9e66d3df214
   languageName: node
   linkType: hard
 
