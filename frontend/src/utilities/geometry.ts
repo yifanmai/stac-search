@@ -8,11 +8,8 @@ function clamp(num: number, min: number, max: number) {
 }
 
 // Valid range for EPSG:3857 https://epsg.io/3857
-// const MAX_LNG = 20037508.34;
-// const MAX_LAT = 20048966.10;
-
-const MAX_LNG = 20000000;
-const MAX_LAT = 20000000;
+const MAX_LNG = 20037508.34;
+const MAX_LAT = 20048966.10;
 
 function clampCoordinatesToValidRange(
     input: number[],
