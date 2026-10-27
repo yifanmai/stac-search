@@ -96,17 +96,21 @@ export default function App() {
 
   const onSearchQuery = (searchQuery: SearchQuery) => {
     setSearchQuery(searchQuery);
+    setSTACItems(null);
+    setSTACAssets(null);
+    setSelectedSTACCollection(null);
+    setSelectedSTACItem(null);
   };
 
   const onSelectSTACCollection = (stacCollection: STACCollection) => {
     if (stacCollection === selectedSTACCollection) return;
+    setSTACItems(null);
+    setSTACAssets(null);
     setSelectedSTACCollection(stacCollection);
+    setSelectedSTACItem(null);
     setMapAnimationRequest(
       MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION,
     );
-    setSTACItems(null);
-    setSTACAssets(null);
-    setSelectedSTACItem(null);
   };
 
   const onSelectSTACItem = (stacItem: STACItem) => {
