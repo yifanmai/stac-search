@@ -65,17 +65,17 @@ export function performMapAnimations(
       mapAnimationRequest ===
       MapAnimationRequestValues.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS
     ) {
-      animateViewToAllSTACCollections(map, stacCollectionsLayer);
+      setTimeout(() => animateViewToAllSTACCollections(map, stacCollectionsLayer));
     } else if (
       mapAnimationRequest ===
       MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION
     ) {
       if (selectedSTACCollection) {
-        animateViewToSelectedSTACCollection(
+        setTimeout(() => animateViewToSelectedSTACCollection(
           map,
           selectedSTACCollection,
           stacCollectionsLayer,
-        );
+        ));
       }
     }
     onMapAnimationStarted();

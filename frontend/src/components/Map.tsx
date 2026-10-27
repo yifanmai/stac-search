@@ -24,6 +24,7 @@ import {
   createSelectSTACItemInteraction,
 } from "./map/MapInteractions";
 import ExtentInteraction from "ol/interaction/Extent";
+import SelectInteraction from "ol/interaction/Select";
 
 interface Props {
   stacCollections: STACCollection[];
@@ -43,6 +44,7 @@ interface OLMapState {
   stacCollectionsLayer: VectorLayer;
   stacItemsLayer: VectorLayer;
   stacAssetsLayer: WebGLTileLayer;
+  selectSTACCollectionInteraction: SelectInteraction;
   extentInteraction: ExtentInteraction;
 }
 
@@ -84,6 +86,7 @@ function createMap(
     stacCollectionsLayer: stacCollectionsLayer,
     stacItemsLayer: stacItemsLayer,
     stacAssetsLayer: stacAssetsLayer,
+    selectSTACCollectionInteraction: selectSTACCollectionInteraction,
     extentInteraction: extentInteraction,
   };
 }

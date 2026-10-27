@@ -53,6 +53,12 @@ export function createSTACAssetsLayer(): WebGLTileLayer {
   return new WebGLTileLayer({ source: undefined });
 }
 
+function areArraysEqual<Type>(array1: Type[], array2: Type[]): boolean {
+  if (array1.length !== array2.length) return false;
+  return array1.every((v, index) => v === array2[index]);
+}
+
+
 export function updateSTACCollectionsLayer(
   layer: VectorLayer,
   stacCollections: STACCollection[],
@@ -64,6 +70,10 @@ export function updateSTACCollectionsLayer(
   const sourceFeatures = source.getFeaturesCollection();
   if (sourceFeatures === null) {
     throw "STAC Collections layer has no source features";
+  }
+  const stacCollectionsFromFeatures = sourceFeatures.getArray().map((feature:Feature )=> feature.getProperties()["stacCollection"])
+  if (areArraysEqual(stacCollections, stacCollectionsFromFeatures)) {
+    return;
   }
   sourceFeatures.clear();
   sourceFeatures.extend(stacCollections.map(getFeatureForSTACCollection));
