@@ -12,6 +12,7 @@ import WebGLTileLayer from "ol/layer/WebGLTile";
 import { isCOGAsset } from "../../utilities/COG";
 import GeoTIFFSource from "ol/source/GeoTIFF";
 import type STACAsset from "../../types/STACAsset";
+import { clampFeatureGeometryToValidRange, clampGeometryToValidRange } from "../../utilities/geometry";
 
 export function createBaseLayer(): LayerGroup {
   const openFreeMapLayerGroup = new LayerGroup();
@@ -125,15 +126,9 @@ function getFeatureForSTACCollection(stacCollection: STACCollection): Feature {
       },
     },
     { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" },
-  );
-  // readFeature() can return Feature or Feature[]
-  // but this function should only return Feature
-  // TODO: Remove this once the upstream return type is changed
-  if (feature instanceof Feature) {
-    return feature;
-  } else {
-    return feature[0];
-  }
+  ) as Feature;
+  clampFeatureGeometryToValidRange(feature);
+  return feature
 }
 
 function getFeatureForSTACItem(stacItem: STACItem): Feature {
@@ -151,13 +146,10 @@ function getFeatureForSTACItem(stacItem: STACItem): Feature {
     },
 
     { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" },
-  );
+  ) as Feature;
   // readFeature() can return Feature or Feature[]
   // but this function should only return Feature
   // TODO: Remove this once the upstream return type is changed
-  if (feature instanceof Feature) {
-    return feature;
-  } else {
-    return feature[0];
-  }
+  clampFeatureGeometryToValidRange(feature);
+  return feature
 }
