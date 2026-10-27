@@ -12,7 +12,7 @@ import WebGLTileLayer from "ol/layer/WebGLTile";
 import { isCOGAsset } from "../../utilities/COG";
 import GeoTIFFSource from "ol/source/GeoTIFF";
 import type STACAsset from "../../types/STACAsset";
-import { clampFeatureGeometryToValidRange } from "../../utilities/geometry";
+import { clampGeometryToValidRange } from "../../utilities/geometry";
 import proj4 from 'proj4';
 import {register} from 'ol/proj/proj4.js';
 
@@ -132,7 +132,7 @@ function getFeatureForSTACCollection(stacCollection: STACCollection): Feature {
   const feature = new GeoJSON().readFeature(
     {
       type: "Feature",
-      geometry: stacCollection.bbox,
+      geometry: clampGeometryToValidRange(stacCollection.bbox),
       properties: {
         type: "collection",
         title: stacCollection.title,
@@ -142,7 +142,6 @@ function getFeatureForSTACCollection(stacCollection: STACCollection): Feature {
     },
     { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" },
   ) as Feature;
-  clampFeatureGeometryToValidRange(feature);
   return feature
 }
 
@@ -151,7 +150,7 @@ function getFeatureForSTACItem(stacItem: STACItem): Feature {
   const feature = new GeoJSON().readFeature(
     {
       type: "Feature",
-      geometry: geometry,
+      geometry: clampGeometryToValidRange(geometry),
       properties: {
         type: "item",
         title: stacItem.title,
@@ -165,7 +164,6 @@ function getFeatureForSTACItem(stacItem: STACItem): Feature {
   // readFeature() can return Feature or Feature[]
   // but this function should only return Feature
   // TODO: Remove this once the upstream return type is changed
-  clampFeatureGeometryToValidRange(feature);
   return feature
 }
 
