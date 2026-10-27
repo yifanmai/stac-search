@@ -22,6 +22,7 @@ import {
   createExtentInteraction,
   createSelectSTACCollectionInteraction,
   createSelectSTACItemInteraction,
+  updateSelectSTACCollectionInteraction,
 } from "./map/MapInteractions";
 import ExtentInteraction from "ol/interaction/Extent";
 import SelectInteraction from "ol/interaction/Select";
@@ -133,6 +134,9 @@ function Map({
     updateSTACCollectionsLayer(mapState.stacCollectionsLayer, stacCollections);
     updateSTACItemsLayer(mapState.stacItemsLayer, stacItems);
     updateSTACAssetsLayer(mapState.stacAssetsLayer, stacAssets);
+
+    // Update selections
+    updateSelectSTACCollectionInteraction(selectedSTACCollection, mapState.selectSTACCollectionInteraction, mapState.stacCollectionsLayer)
 
     // Animate map view (if requested)
     performMapAnimations(

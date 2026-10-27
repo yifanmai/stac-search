@@ -7,6 +7,7 @@ import type STACCollection from "../../types/STACCollection";
 import { toLonLat } from "ol/proj";
 import type BoundingBox from "../../types/BoundingBox";
 import type STACItem from "../../types/STACItem";
+import type VectorLayer from "ol/layer/Vector";
 
 export function createSelectSTACCollectionInteraction(
   stacCollectionsLayer: Layer,
@@ -20,6 +21,7 @@ export function createSelectSTACCollectionInteraction(
 
   selectInteraction.on("select", (event) => {
     const selectedFeatures = event.target.getFeatures().getArray();
+    console.log(selectedFeatures);
     if (selectedFeatures.length !== 1) {
       return;
     }
@@ -73,4 +75,27 @@ export function createExtentInteraction(
     }
   });
   return extentInteraction;
+}
+
+export function updateSelectSTACCollectionInteraction(
+  selectedSTACCollection: STACCollection | null,
+  selectSTACCollectionInteraction: SelectInteraction,
+  stacCollectionsLayer: VectorLayer,
+): void {
+  if (!selectedSTACCollection) {
+    return;
+  }
+  const interactionSelectedSTACCollections = selectSTACCollectionInteraction.getFeatures().getArray().map((feature) => feature.getProperties()["stacCollection"]);
+  if (interactionSelectedSTACCollections.length === 1 && interactionSelectedSTACCollections[0] === selectedSTACCollection) {
+    return;
+  }
+  const selectedFeature = stacCollectionsLayer.getSource()?.getFeaturesCollection()?.getArray().find((feature) => feature.getProperties()["stacCollection"] === selectedSTACCollection);
+  console.log(stacCollectionsLayer.getSource()?.getFeaturesCollection()?.getArray());
+  if (!selectedFeature) {
+    return;
+  }
+  // Manipulate the FeatureCollection directly instead of the SelectInteraction to avoid firing SelectInteraction events
+  const selectInteractionFeatures = selectSTACCollectionInteraction.getFeatures();
+  selectInteractionFeatures.clear();
+  selectInteractionFeatures.push(selectedFeature);
 }

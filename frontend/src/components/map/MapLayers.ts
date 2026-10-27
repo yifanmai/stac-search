@@ -1,5 +1,5 @@
 import { apply as applyOLMapboxStyle } from "ol-mapbox-style";
-import { stacCollectionStyleFunction } from "./MapStyles";
+import { stacCollectionStyleFunction, stacItemStyleFunction } from "./MapStyles";
 import Collection from "ol/Collection";
 import Feature from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON.js";
@@ -43,7 +43,7 @@ export function createSTACItemsLayer(): VectorLayer {
   });
   const stacItemsLayer = new VectorLayer({
     source: stacItemsSource,
-    // style: stacItemStyleFunction,
+    style: stacItemStyleFunction,
     declutter: true,
   });
   return stacItemsLayer;
