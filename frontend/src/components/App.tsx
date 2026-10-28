@@ -42,18 +42,26 @@ export default function App() {
   // that sets it back to false.
   const [clearExtentRequest, setClearExtentRequest] = useState<boolean>(false);
 
+  const [searchStatus, setSearchStatus] = useState<string>("");
+
   // Search queries
   useEffect(() => {
     if (searchQuery === null) return;
+    if (searchQuery.queryText === "" && searchQuery === null) return;
     const controller = new AbortController();
     async function asyncDoSearch() {
       if (searchQuery === null) return;
-      const response = await doSearch(searchQuery, controller.signal);
-      setSelectedSTACCollection(null);
-      setSTACCollections(response);
-      setMapAnimationRequest(
-        MapAnimationRequestValues.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS,
-      );
+      setSearchStatus("Searching...");
+      try {
+        const response = await doSearch(searchQuery, controller.signal);
+        setSelectedSTACCollection(null);
+        setSTACCollections(response);
+        setMapAnimationRequest(
+          MapAnimationRequestValues.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS,
+        );
+      } catch (error) {
+        setSearchStatus("Search failed: " + (error as object).toString());
+      }
     }
     asyncDoSearch();
     return () => controller.abort();
@@ -125,14 +133,15 @@ export default function App() {
     }
     setAreaOfInterest(bbox);
   };
+  console.log(searchStatus);
 
   return (
     <>
       <Map
         stacCollections={stacCollections || []}
-        selectedSTACCollection={selectedSTACCollection}
         stacItems={stacItems || []}
         stacAssets={stacAssets || []}
+        selectedSTACCollection={selectedSTACCollection}
         mapAnimationRequest={mapAnimationRequest}
         clearExtentRequest={clearExtentRequest}
         onSelectSTACCollection={onSelectSTACCollection}
@@ -148,10 +157,11 @@ export default function App() {
             onSearchQuery={onSearchQuery}
             onClearAreaOfInterest={() => setClearExtentRequest(true)}
           ></SearchQueryBox>
-          {stacCollections !== null ? (
+          {stacCollections !== null || searchStatus !== "" ? (
             <SearchResultsBox
               stacCollections={stacCollections}
               selectedSTACCollection={selectedSTACCollection}
+              searchStatus={searchStatus}
               onSelectSTACCollection={onSelectSTACCollection}
             ></SearchResultsBox>
           ) : null}

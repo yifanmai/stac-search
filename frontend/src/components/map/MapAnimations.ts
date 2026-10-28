@@ -56,6 +56,7 @@ function getVectorLayerGeometry(vectorLayer: VectorLayer): MultiPolygon {
 export function performMapAnimations(
   map: OLMap,
   mapAnimationRequest: MapAnimationRequest | null,
+  stacCollections: STACCollection[],
   selectedSTACCollection: STACCollection | null,
   stacCollectionsLayer: VectorLayer,
   onMapAnimationStarted: () => void,
@@ -65,17 +66,23 @@ export function performMapAnimations(
       mapAnimationRequest ===
       MapAnimationRequestValues.ANIMATE_VIEW_TO_ALL_STAC_COLLECTIONS
     ) {
-      setTimeout(() => animateViewToAllSTACCollections(map, stacCollectionsLayer));
+      if (stacCollections.length > 0) {
+        setTimeout(() =>
+          animateViewToAllSTACCollections(map, stacCollectionsLayer),
+        );
+      }
     } else if (
       mapAnimationRequest ===
       MapAnimationRequestValues.ANIMATE_VIEW_TO_SELECTED_STAC_COLLECTION
     ) {
       if (selectedSTACCollection) {
-        setTimeout(() => animateViewToSelectedSTACCollection(
-          map,
-          selectedSTACCollection,
-          stacCollectionsLayer,
-        ));
+        setTimeout(() =>
+          animateViewToSelectedSTACCollection(
+            map,
+            selectedSTACCollection,
+            stacCollectionsLayer,
+          ),
+        );
       }
     }
     onMapAnimationStarted();

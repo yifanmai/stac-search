@@ -1,5 +1,8 @@
 import { apply as applyOLMapboxStyle } from "ol-mapbox-style";
-import { stacCollectionStyleFunction, stacItemStyleFunction } from "./MapStyles";
+import {
+  stacCollectionStyleFunction,
+  stacItemStyleFunction,
+} from "./MapStyles";
 import Collection from "ol/Collection";
 import Feature from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON.js";
@@ -13,12 +16,12 @@ import { isCOGAsset } from "../../utilities/COG";
 import GeoTIFFSource from "ol/source/GeoTIFF";
 import type STACAsset from "../../types/STACAsset";
 import { clampGeometryToValidRange } from "../../utilities/geometry";
-import proj4 from 'proj4';
-import {register} from 'ol/proj/proj4.js';
+import proj4 from "proj4";
+import { register } from "ol/proj/proj4.js";
 
 // Support raster reprojection
 // See: https://openlayers.org/doc/tutorials/raster-reprojection.html
-register(proj4)
+register(proj4);
 
 export function createBaseLayer(): LayerGroup {
   const openFreeMapLayerGroup = new LayerGroup();
@@ -71,7 +74,9 @@ export function updateSTACCollectionsLayer(
   if (sourceFeatures === null) {
     throw "STAC Collections layer has no source features";
   }
-  const stacCollectionsFromFeatures = sourceFeatures.getArray().map((feature:Feature )=> feature.getProperties()["stacCollection"])
+  const stacCollectionsFromFeatures = sourceFeatures
+    .getArray()
+    .map((feature: Feature) => feature.getProperties()["stacCollection"]);
   if (areArraysEqual(stacCollections, stacCollectionsFromFeatures)) {
     return;
   }
@@ -91,7 +96,9 @@ export function updateSTACItemsLayer(
   if (sourceFeatures === null) {
     throw "STAC Items layer has no source features";
   }
-  const stacItemsFromFeatures = sourceFeatures.getArray().map((feature:Feature )=> feature.getProperties()["stacItem"])
+  const stacItemsFromFeatures = sourceFeatures
+    .getArray()
+    .map((feature: Feature) => feature.getProperties()["stacItem"]);
   if (areArraysEqual(stacItems, stacItemsFromFeatures)) {
     return;
   }
@@ -142,7 +149,7 @@ function getFeatureForSTACCollection(stacCollection: STACCollection): Feature {
     },
     { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" },
   ) as Feature;
-  return feature
+  return feature;
 }
 
 function getFeatureForSTACItem(stacItem: STACItem): Feature {
@@ -164,7 +171,7 @@ function getFeatureForSTACItem(stacItem: STACItem): Feature {
   // readFeature() can return Feature or Feature[]
   // but this function should only return Feature
   // TODO: Remove this once the upstream return type is changed
-  return feature
+  return feature;
 }
 
 function areArraysEqual<Type>(array1: Type[], array2: Type[]): boolean {

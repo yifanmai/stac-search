@@ -136,12 +136,17 @@ function Map({
     updateSTACAssetsLayer(mapState.stacAssetsLayer, stacAssets);
 
     // Update selections
-    updateSelectSTACCollectionInteraction(selectedSTACCollection, mapState.selectSTACCollectionInteraction, mapState.stacCollectionsLayer)
+    updateSelectSTACCollectionInteraction(
+      selectedSTACCollection,
+      mapState.selectSTACCollectionInteraction,
+      mapState.stacCollectionsLayer,
+    );
 
     // Animate map view (if requested)
     performMapAnimations(
       mapState.map,
       mapAnimationRequest,
+      stacCollections,
       selectedSTACCollection,
       mapState.stacCollectionsLayer,
       onMapAnimationStarted,

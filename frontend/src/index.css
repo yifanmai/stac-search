@@ -125,3 +125,7 @@ h6 {
 .btn:hover {
   background-color: #333;
 }
+
+.search-status {
+  font-style: italic;
+}

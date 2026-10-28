@@ -54,7 +54,6 @@ export const selectedSTACCollectionStyleFunction = (
   });
 };
 
-
 export const stacItemStyleFunction = (
   feature: FeatureLike,
   _index: number, // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -64,9 +63,9 @@ export const stacItemStyleFunction = (
       color: "#333",
       width: 1,
     }),
-  fill: new Fill({
-    color: [255, 255, 255, 0.1],
-  }),
+    fill: new Fill({
+      color: [255, 255, 255, 0.1],
+    }),
     text: new Text({
       declutterMode: "declutter",
       overflow: false,

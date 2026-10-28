@@ -1,7 +1,10 @@
 import { click, platformModifierKeyOnly } from "ol/events/condition";
 import ExtentInteraction from "ol/interaction/Extent";
 import SelectInteraction from "ol/interaction/Select";
-import { extentInteractionStyle, selectedSTACCollectionStyleFunction } from "./MapStyles";
+import {
+  extentInteractionStyle,
+  selectedSTACCollectionStyleFunction,
+} from "./MapStyles";
 import type Layer from "ol/layer/Layer";
 import type STACCollection from "../../types/STACCollection";
 import { toLonLat } from "ol/proj";
@@ -85,17 +88,33 @@ export function updateSelectSTACCollectionInteraction(
   if (!selectedSTACCollection) {
     return;
   }
-  const interactionSelectedSTACCollections = selectSTACCollectionInteraction.getFeatures().getArray().map((feature) => feature.getProperties()["stacCollection"]);
-  if (interactionSelectedSTACCollections.length === 1 && interactionSelectedSTACCollections[0] === selectedSTACCollection) {
+  const interactionSelectedSTACCollections = selectSTACCollectionInteraction
+    .getFeatures()
+    .getArray()
+    .map((feature) => feature.getProperties()["stacCollection"]);
+  if (
+    interactionSelectedSTACCollections.length === 1 &&
+    interactionSelectedSTACCollections[0] === selectedSTACCollection
+  ) {
     return;
   }
-  const selectedFeature = stacCollectionsLayer.getSource()?.getFeaturesCollection()?.getArray().find((feature) => feature.getProperties()["stacCollection"] === selectedSTACCollection);
-  console.log(stacCollectionsLayer.getSource()?.getFeaturesCollection()?.getArray());
+  const selectedFeature = stacCollectionsLayer
+    .getSource()
+    ?.getFeaturesCollection()
+    ?.getArray()
+    .find(
+      (feature) =>
+        feature.getProperties()["stacCollection"] === selectedSTACCollection,
+    );
+  console.log(
+    stacCollectionsLayer.getSource()?.getFeaturesCollection()?.getArray(),
+  );
   if (!selectedFeature) {
     return;
   }
   // Manipulate the FeatureCollection directly instead of the SelectInteraction to avoid firing SelectInteraction events
-  const selectInteractionFeatures = selectSTACCollectionInteraction.getFeatures();
+  const selectInteractionFeatures =
+    selectSTACCollectionInteraction.getFeatures();
   selectInteractionFeatures.clear();
   selectInteractionFeatures.push(selectedFeature);
 }
