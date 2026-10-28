@@ -21,15 +21,18 @@ export default function SearchResultsBox({
       : "";
   return (
     <div className="search-results">
-      {message ? <p className="search-status">{message}</p> : null}
-      {(stacCollections || []).map((stacCollection) => (
-        <STACCollectionCard
-          key={stacCollection.url}
-          stacCollection={stacCollection}
-          onSelectResult={onSelectResult}
-          isSelected={selectedSTACCollection?.url === stacCollection.url}
-        ></STACCollectionCard>
-      ))}
+      {stacCollections !== null ? (
+        stacCollections.map((stacCollection) => (
+          <STACCollectionCard
+            key={stacCollection.url}
+            stacCollection={stacCollection}
+            onSelectResult={onSelectResult}
+            isSelected={selectedSTACCollection?.url === stacCollection.url}
+          ></STACCollectionCard>
+        ))
+      ) : message ? (
+        <p className="search-status">{message}</p>
+      ) : null}
     </div>
   );
 }
