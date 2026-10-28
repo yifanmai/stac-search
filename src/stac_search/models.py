@@ -1,4 +1,3 @@
-
 from geojson_pydantic import Polygon
 from geojson_pydantic.geometries import Geometry
 from pydantic import BaseModel

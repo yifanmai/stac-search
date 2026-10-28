@@ -1,5 +1,3 @@
-
-
 import psycopg
 from geojson_pydantic import Polygon
 
