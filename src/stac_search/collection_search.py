@@ -54,8 +54,6 @@ def search_stac_collections(
 ) -> list[STACCollection]:
     query_template = build_sql_query(query_text, bbox)
     query_params = build_sql_params(query_text, bbox)
-    print(query_template)
-    print(query_params)
     stac_collections = []
     info = TypeInfo.fetch(conn, "geometry")
     register_adapters(info, conn)
