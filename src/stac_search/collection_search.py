@@ -20,7 +20,7 @@ def build_sql_query(query_text: str, bbox: BoundingBox | None) -> str:
     if query_text:
         conditions.append("textsearch_vector @@ textsearch_query")
     if bbox:
-        conditions.append("ST_Intersects(bbox, %(bbox_polygon)s)")
+        conditions.append("ST_Contains(bbox, %(bbox_polygon)s)")
     order_by_clause = (
         "ORDER BY ts_rank_cd(textsearch_vector, textsearch_query) DESC"
         if query_text
